@@ -1,0 +1,16 @@
+PROCESSOS DECLARADOS: 9
+STRATEGIES DE PROCESSO: 22
+PROCESSOS SEM STRATEGY: nenhum
+APROVACAO_PAGAMENTO: [(10, 'validar-pagamento'), (20, 'aprovar-pagamento'), (30, 'aprovar-pedido-pago')] duplicadas=nenhuma
+ESVAZIAR_CARRINHO: [(10, 'validar-carrinho'), (20, 'esvaziar-carrinho')] duplicadas=nenhuma
+CANCELAR_PEDIDO: [(10, 'validar-cancelamento'), (20, 'devolver-estoque'), (30, 'marcar-pedido-cancelado')] duplicadas=nenhuma
+APROVAR_PEDIDO: [(10, 'validar-aprovacao-pedido'), (20, 'reservar-estoque-atomico'), (30, 'marcar-aguardando-pagamento')] duplicadas=nenhuma
+EXCLUIR_PEDIDO: [(10, 'validar-exclusao-pedido'), (20, 'excluir-pedido')] duplicadas=nenhuma
+CALCULAR_FRETE: [(10, 'validar-pedido-para-frete'), (20, 'calcular-subtotal-e-snapshot'), (30, 'aplicar-strategy-frete')] duplicadas=nenhuma
+EDITAR_PEDIDO: [(10, 'validar-edicao-pedido'), (20, 'alterar-tipo-frete-e-invalidar-calculo')] duplicadas=nenhuma
+MOVIMENTACAO_ESTOQUE_ENTRADA: [(10, 'validar-entrada-estoque'), (20, 'executar-entrada-estoque')] duplicadas=nenhuma
+MOVIMENTACAO_ESTOQUE_SAIDA: [(10, 'validar-saida-estoque'), (20, 'executar-saida-estoque')] duplicadas=nenhuma
+TIPOS FRETE: ['NORMAL', 'EXPRESSO']
+IMPLEMENTACOES FRETE: [('NORMAL', 'FreteNormalStrategy.java'), ('EXPRESSO', 'FreteExpressoStrategy.java')]
+FRETES SEM STRATEGY: nenhum
+FRETES DUPLICADOS: nenhum

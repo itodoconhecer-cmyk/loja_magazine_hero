@@ -1,0 +1,23 @@
+CENARIO|RESULTADO|SEVERIDADE|OBSERVACAO
+01 fluxo feliz completo|PASSOU|baseline|Fluxo principal funciona no modelo atual.
+02 carrinho alterado apos calcular frete|GAP|CRITICO|total pedido=115; itens reservados=1000; o pipeline aprovou mesmo divergente.
+03 carrinho vazio na aprovacao|GAP|CRITICO|ReservarEstoquePedidoStrategy nao rejeita lista vazia.
+04 recalcular frete aguardando pagamento|GAP|CRITICO|status=AGUARDANDO_PAGAMENTO; validacao atual bloqueia apenas CANCELADO/EXCLUIDO.
+05 recalcular frete de pedido APROVADO|GAP|CRITICO|Permite alterar total de pedido ja pago.
+06 cancelar pedido pago|GAP|CRITICO|Pedido vira CANCELADO e pagamento permanece APROVADO; falta politica de estorno/cancelamento.
+07 cancelar pedido com produto desativado|GAP|ALTO|findById de Produto filtra ativo=true e impede devolucao de estoque.
+08 aprovar pagamento previamente CANCELADO|GAP|ALTO|ValidarPagamentoStrategy nao exige status PENDENTE.
+09 editar pagamento aprovado via CRUD|GAP|CRITICO|PagamentoUseCase.atualizar nao bloqueia status APROVADO nem mudanca de valor/pedido.
+10 excluir pagamento aprovado via CRUD|GAP|CRITICO|DELETE fisico de pagamento pode deixar pedido APROVADO sem evidencia de pagamento.
+11 alterar estoque por PUT /produtos|GAP|ALTO|ProdutoRequest contem estoque; update persiste saldo sem MovimentacaoEstoque.
+12 concorrencia na reserva/saida|GAP|CRITICO|Le saldo e grava valor absoluto; sem lock/version/UPDATE condicional pode ocorrer lost update/overselling.
+13 pedido usa carrinho de outro cliente|GAP|ALTO|PedidoUseCase valida existencia separadamente, mas nao confere carrinho.clienteId == pedido.clienteId.
+14 multiplos pedidos para o mesmo carrinho|GAP|MEDIO|Nao ha regra/constraint que impeça reaproveitar carrinho e reservar estoque varias vezes.
+15 esvaziar carrinho vinculado a pedido|GAP|ALTO|ESVAZIAR_CARRINHO valida apenas existencia do carrinho; nao verifica pedidos RASCUNHO/AGUARDANDO.
+16 duas ProcessStrategy com a mesma ordem|GAP|MEDIO|PipelineExecutor apenas ordena; nao valida unicidade de (processo, ordem).
+17 duas FreteStrategy do mesmo tipo|GAP|MEDIO|EnumMap.put sobrescreve silenciosamente a implementacao anterior.
+18 constraint de banco para estoque >= 0|GAP|ALTO|schema.sql nao possui CHECK(estoque >= 0) nem CHECK(quantidade > 0).
+19 reserva e devolucao sem movimentacao de estoque|GAP|ALTO|Aprovar/cancelar altera Produto diretamente e nao insere MovimentacaoEstoque.
+20 erro de integridade vira resposta controlada|GAP|MEDIO|ApiExceptionHandler nao trata DataIntegrityViolationException/RepositoryException; pode retornar 500 cru.
+
+TOTAL=20 PASSOU=1 GAPS=19

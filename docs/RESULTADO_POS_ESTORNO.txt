@@ -1,0 +1,34 @@
+CENARIO|RESULTADO|OBSERVACAO
+01 fluxo feliz|PASSOU|fluxo completo
+02 bloquear alteracao de carrinho apos pedido|PASSOU|carrinho imutavel apos conversao em pedido
+03 impedir carrinho de outro cliente|PASSOU|cliente/carrinho validados
+04 impedir multiplos pedidos no mesmo carrinho|PASSOU|um carrinho gera um pedido
+05 snapshot de itens no calculo do frete|PASSOU|snapshot gerado no calculo
+06 bloquear recalculo aguardando pagamento|PASSOU|recalculo bloqueado
+07 bloquear recalculo de pedido pago|PASSOU|pedido pago protegido
+08 editar tipo de frete invalida total/snapshot|PASSOU|edicao exige novo calculo
+09 bloquear aprovacao sem itens|PASSOU|snapshot vazio bloqueado
+10 bloquear reaprovacao de pagamento|PASSOU|somente pendente
+11 bloquear cancelamento direto de pedido pago|PASSOU|pedido pago exige estorno separado
+12 devolver estoque mesmo com produto inativo|PASSOU|devolucao independe de ativo
+13 auditar reserva e devolucao|PASSOU|movimentacoes registradas
+14 impedir overselling no update atomico|PASSOU|segunda reserva falha no saldo atualizado
+15 constraint estoque nao negativo|PASSOU|constraint presente
+16 constraint quantidades positivas|PASSOU|constraints presentes
+17 pagamento unico por pedido|PASSOU|unique presente
+18 carrinho gera no maximo um pedido|PASSOU|unique presente
+19 reserva/saida usa SQL atomico|PASSOU|update condicional presente
+20 CRUD produto nao altera saldo|PASSOU|update de produto altera apenas nome/preco
+21 detectar ordem duplicada de strategy|PASSOU|fail-fast configurado
+22 detectar FreteStrategy duplicada|PASSOU|fail-fast configurado
+23 tratar violacao de integridade|PASSOU|erros traduzidos para resposta controlada
+24 auditar estoque inicial|PASSOU|estoque inicial gera movimento
+25 estornar pagamento aprovado|PASSOU|estorno consistente
+26 bloquear estorno duplicado|PASSOU|estorno idempotente por bloqueio de estado
+27 bloquear estorno de pagamento pendente|PASSOU|somente aprovado
+28 pipeline de estorno possui 4 strategies ordenadas|PASSOU|ordens=[10, 20, 30, 40]
+29 endpoint POST de estorno|PASSOU|endpoint presente
+30 pipeline de estorno transacional|PASSOU|executor transacional
+31 status de pagamento ESTORNADO|PASSOU|status explicito presente
+
+TOTAL=31 PASSOU=31 FALHOU=0
