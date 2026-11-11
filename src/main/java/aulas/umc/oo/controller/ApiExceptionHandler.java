@@ -26,7 +26,8 @@ public class ApiExceptionHandler {
     private static final Logger ERROR_LOG = LoggerFactory.getLogger("ERRORS");
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiErrorResponse> requestInvalido(MethodArgumentNotValidException exception, HttpServletRequest request) {
+    ResponseEntity<ApiErrorResponse> requestInvalido(
+            MethodArgumentNotValidException exception, HttpServletRequest request) {
         List<FieldValidationError> campos = exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> new FieldValidationError(error.getField(), error.getDefaultMessage()))
                 .toList();
@@ -35,7 +36,8 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    ResponseEntity<ApiErrorResponse> parametroInvalido(ConstraintViolationException exception, HttpServletRequest request) {
+    ResponseEntity<ApiErrorResponse> parametroInvalido(
+            ConstraintViolationException exception, HttpServletRequest request) {
         List<FieldValidationError> campos = exception.getConstraintViolations().stream()
                 .map(v -> new FieldValidationError(v.getPropertyPath().toString(), v.getMessage()))
                 .toList();
@@ -45,19 +47,27 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(UseCaseException.class)
     ResponseEntity<ApiErrorResponse> casoDeUso(UseCaseException exception, HttpServletRequest request) {
-        ERROR_LOG.error("use_case_error useCase={} code={} message={}",
-                exception.getUseCase(), exception.getCodigo(), exception.getMessage());
-        return resposta(HttpStatus.UNPROCESSABLE_ENTITY, exception.getCodigo(), exception.getMessage(), request, List.of());
+        ERROR_LOG.error(
+                "use_case_error useCase={} code={} message={}",
+                exception.getUseCase(),
+                exception.getCodigo(),
+                exception.getMessage());
+        return resposta(
+                HttpStatus.UNPROCESSABLE_ENTITY, exception.getCodigo(), exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(InitialFlowValidationException.class)
-    ResponseEntity<ApiErrorResponse> fluxoInicial(InitialFlowValidationException exception, HttpServletRequest request) {
-        ERROR_LOG.error("initial_flow_validation_error code={} message={}", exception.getCodigo(), exception.getMessage());
-        return resposta(HttpStatus.UNPROCESSABLE_ENTITY, exception.getCodigo(), exception.getMessage(), request, List.of());
+    ResponseEntity<ApiErrorResponse> fluxoInicial(
+            InitialFlowValidationException exception, HttpServletRequest request) {
+        ERROR_LOG.error(
+                "initial_flow_validation_error code={} message={}", exception.getCodigo(), exception.getMessage());
+        return resposta(
+                HttpStatus.UNPROCESSABLE_ENTITY, exception.getCodigo(), exception.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(ResponseValidationException.class)
-    ResponseEntity<ApiErrorResponse> responseInvalido(ResponseValidationException exception, HttpServletRequest request) {
+    ResponseEntity<ApiErrorResponse> responseInvalido(
+            ResponseValidationException exception, HttpServletRequest request) {
         ERROR_LOG.error("response_contract_error violations={}", exception.getViolacoes());
         List<FieldValidationError> campos = exception.getViolacoes().stream()
                 .map(v -> new FieldValidationError("response", v))
@@ -73,12 +83,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler({DataIntegrityViolationException.class, RepositoryException.class})
     ResponseEntity<ApiErrorResponse> persistencia(RuntimeException exception, HttpServletRequest request) {
         ERROR_LOG.error("persistence_error message={}", exception.getMessage(), exception);
-        return resposta(
-                HttpStatus.CONFLICT,
-                "DB-001",
-                "Operacao viola uma regra de persistencia",
-                request,
-                List.of());
+        return resposta(HttpStatus.CONFLICT, "DB-001", "Operacao viola uma regra de persistencia", request, List.of());
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
@@ -90,12 +95,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> erroNaoTratado(Exception exception, HttpServletRequest request) {
         ERROR_LOG.error("unhandled_error", exception);
-        return resposta(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "SYS-001",
-                "Erro interno inesperado",
-                request,
-                List.of());
+        return resposta(HttpStatus.INTERNAL_SERVER_ERROR, "SYS-001", "Erro interno inesperado", request, List.of());
     }
 
     private ResponseEntity<ApiErrorResponse> resposta(

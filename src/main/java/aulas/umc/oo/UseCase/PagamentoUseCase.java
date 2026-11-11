@@ -21,15 +21,15 @@ public class PagamentoUseCase {
     private final PedidoRepository pedidoRepository;
     private final PagamentoMapper mapper;
 
-    public PagamentoUseCase(
-            PagamentoRepository repository, PedidoRepository pedidoRepository, PagamentoMapper mapper) {
+    public PagamentoUseCase(PagamentoRepository repository, PedidoRepository pedidoRepository, PagamentoMapper mapper) {
         this.repository = repository;
         this.pedidoRepository = pedidoRepository;
         this.mapper = mapper;
     }
 
     public PagamentoResponse criar(PagamentoRequest request) {
-        Pedido pedido = pedidoRepository.findById(request.pedidoId())
+        Pedido pedido = pedidoRepository
+                .findById(request.pedidoId())
                 .orElseThrow(() -> new PagamentoUseCaseException("PAG-001", "Pedido nao encontrado"));
 
         if (pedido.status != StatusPedido.AGUARDANDO_PAGAMENTO) {
@@ -38,8 +38,7 @@ public class PagamentoUseCase {
         }
 
         if (request.valor().compareTo(pedido.total) != 0) {
-            throw new PagamentoUseCaseException(
-                    "PAG-003", "Valor do pagamento diferente do total do pedido");
+            throw new PagamentoUseCaseException("PAG-003", "Valor do pagamento diferente do total do pedido");
         }
 
         if (repository.findByPedidoId(request.pedidoId()).isPresent()) {
@@ -59,12 +58,14 @@ public class PagamentoUseCase {
     }
 
     public PagamentoResponse buscar(UUID id) {
-        return mapper.toResponse(repository.findById(id)
+        return mapper.toResponse(repository
+                .findById(id)
                 .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado")));
     }
 
     public PagamentoResponse atualizar(UUID id, PagamentoRequest request) {
-        Pagamento pagamento = repository.findById(id)
+        Pagamento pagamento = repository
+                .findById(id)
                 .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado"));
 
         if (pagamento.status != StatusPagamento.PENDENTE) {
@@ -72,16 +73,15 @@ public class PagamentoUseCase {
         }
 
         if (!pagamento.pedidoId.equals(request.pedidoId())) {
-            throw new PagamentoUseCaseException(
-                    "PAG-006", "Nao e permitido trocar o pedido de um pagamento");
+            throw new PagamentoUseCaseException("PAG-006", "Nao e permitido trocar o pedido de um pagamento");
         }
 
-        Pedido pedido = pedidoRepository.findById(pagamento.pedidoId)
+        Pedido pedido = pedidoRepository
+                .findById(pagamento.pedidoId)
                 .orElseThrow(() -> new PagamentoUseCaseException("PAG-001", "Pedido nao encontrado"));
 
         if (request.valor().compareTo(pedido.total) != 0) {
-            throw new PagamentoUseCaseException(
-                    "PAG-003", "Valor do pagamento diferente do total do pedido");
+            throw new PagamentoUseCaseException("PAG-003", "Valor do pagamento diferente do total do pedido");
         }
 
         pagamento.valor = request.valor();
@@ -90,12 +90,12 @@ public class PagamentoUseCase {
     }
 
     public void excluir(UUID id) {
-        Pagamento pagamento = repository.findById(id)
+        Pagamento pagamento = repository
+                .findById(id)
                 .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado"));
 
         if (pagamento.status != StatusPagamento.PENDENTE) {
-            throw new PagamentoUseCaseException(
-                    "PAG-007", "Somente pagamento PENDENTE pode ser excluido");
+            throw new PagamentoUseCaseException("PAG-007", "Somente pagamento PENDENTE pode ser excluido");
         }
 
         repository.delete(id);

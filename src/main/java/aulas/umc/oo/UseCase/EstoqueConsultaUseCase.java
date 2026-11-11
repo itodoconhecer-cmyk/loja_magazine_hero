@@ -17,8 +17,7 @@ public class EstoqueConsultaUseCase {
     private final MovimentacaoEstoqueRepository movimentacaoRepository;
 
     public EstoqueConsultaUseCase(
-            ProdutoRepository produtoRepository,
-            MovimentacaoEstoqueRepository movimentacaoRepository) {
+            ProdutoRepository produtoRepository, MovimentacaoEstoqueRepository movimentacaoRepository) {
         this.produtoRepository = produtoRepository;
         this.movimentacaoRepository = movimentacaoRepository;
     }
@@ -42,7 +41,8 @@ public class EstoqueConsultaUseCase {
     }
 
     private void validarProduto(UUID produtoId) {
-        produtoRepository.findByIdIncludingInactive(produtoId)
+        produtoRepository
+                .findByIdIncludingInactive(produtoId)
                 .orElseThrow(() -> new EstoqueUseCaseException("EST-404", "Produto nao encontrado"));
     }
 

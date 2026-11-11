@@ -33,10 +33,12 @@ public class PedidoUseCase {
     }
 
     public PedidoResponse criar(PedidoRequest request) {
-        clienteRepository.findById(request.clienteId())
+        clienteRepository
+                .findById(request.clienteId())
                 .orElseThrow(() -> new PedidoUseCaseException("PED-001", "Cliente do pedido nao encontrado"));
 
-        Carrinho carrinho = carrinhoRepository.findById(request.carrinhoId())
+        Carrinho carrinho = carrinhoRepository
+                .findById(request.carrinhoId())
                 .orElseThrow(() -> new PedidoUseCaseException("PED-002", "Carrinho do pedido nao encontrado"));
 
         if (!carrinho.clienteId.equals(request.clienteId())) {
@@ -59,12 +61,12 @@ public class PedidoUseCase {
     }
 
     public PedidoResponse buscar(UUID id) {
-        return mapper.toResponse(repository.findById(id)
+        return mapper.toResponse(repository
+                .findById(id)
                 .orElseThrow(() -> new PedidoUseCaseException("PED-404", "Pedido nao encontrado")));
     }
 
     public void excluirCrud(UUID id) {
-        throw new PedidoUseCaseException(
-                "PED-005", "Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
+        throw new PedidoUseCaseException("PED-005", "Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
     }
 }

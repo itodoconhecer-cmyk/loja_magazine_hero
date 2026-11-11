@@ -22,8 +22,7 @@ public class OperationLoggingFilter extends OncePerRequestFilter {
     private static final String CORRELATION_HEADER = "X-Correlation-Id";
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String correlationId = request.getHeader(CORRELATION_HEADER);

@@ -35,7 +35,8 @@ public class CarrinhoUseCase {
     }
 
     public CarrinhoResponse criar(CarrinhoRequest request) {
-        clienteRepository.findById(request.clienteId())
+        clienteRepository
+                .findById(request.clienteId())
                 .orElseThrow(() -> new CarrinhoUseCaseException("CAR-001", "Cliente do carrinho nao encontrado"));
 
         return toResponse(repository.insert(new Carrinho(request.clienteId())));
@@ -46,17 +47,20 @@ public class CarrinhoUseCase {
     }
 
     public CarrinhoResponse buscar(UUID id) {
-        return toResponse(repository.findById(id)
+        return toResponse(repository
+                .findById(id)
                 .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado")));
     }
 
     public CarrinhoResponse atualizar(UUID id, CarrinhoRequest request) {
         validarCarrinhoNaoConvertidoEmPedido(id);
 
-        clienteRepository.findById(request.clienteId())
+        clienteRepository
+                .findById(request.clienteId())
                 .orElseThrow(() -> new CarrinhoUseCaseException("CAR-001", "Cliente do carrinho nao encontrado"));
 
-        Carrinho carrinho = repository.findById(id)
+        Carrinho carrinho = repository
+                .findById(id)
                 .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
 
         carrinho.clienteId = request.clienteId();
@@ -64,19 +68,18 @@ public class CarrinhoUseCase {
     }
 
     public void excluir(UUID id) {
-        repository.findById(id)
-                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
+        repository.findById(id).orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
         validarCarrinhoNaoConvertidoEmPedido(id);
         repository.deleteLogical(id);
     }
 
     public CarrinhoResponse adicionarItem(UUID id, ItemCarrinhoRequest request) {
-        repository.findById(id)
-                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
+        repository.findById(id).orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
 
         validarCarrinhoNaoConvertidoEmPedido(id);
 
-        produtoRepository.findById(request.produtoId())
+        produtoRepository
+                .findById(request.produtoId())
                 .orElseThrow(() -> new CarrinhoUseCaseException("CAR-002", "Produto do item nao encontrado"));
 
         repository.addItem(new ItemCarrinho(id, request.produtoId(), request.quantidade()));

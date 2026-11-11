@@ -30,12 +30,14 @@ public class ProdutoUseCase {
     }
 
     public ProdutoResponse buscar(UUID id) {
-        return mapper.toResponse(repository.findById(id)
+        return mapper.toResponse(repository
+                .findById(id)
                 .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado")));
     }
 
     public ProdutoResponse atualizar(UUID id, ProdutoRequest request) {
-        Produto produto = repository.findById(id)
+        Produto produto = repository
+                .findById(id)
                 .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado"));
 
         produto.nome = request.nome();
@@ -45,8 +47,7 @@ public class ProdutoUseCase {
     }
 
     public void excluir(UUID id) {
-        repository.findById(id)
-                .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado"));
+        repository.findById(id).orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado"));
         repository.deleteLogical(id);
     }
 }
