@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record PedidoRequest(
-        @NotNull UUID clienteId,
-        @NotNull UUID carrinhoId,
-        @NotNull TipoFrete tipoFrete) {}
+        @NotNull(message = "clienteId e obrigatorio") UUID clienteId,
+        @NotNull(message = "carrinhoId e obrigatorio") UUID carrinhoId,
+        @NotNull(message = "tipoFrete e obrigatorio") TipoFrete tipoFrete) {}

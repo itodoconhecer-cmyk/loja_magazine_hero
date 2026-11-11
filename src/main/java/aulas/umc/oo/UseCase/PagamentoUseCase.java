@@ -1,70 +1,103 @@
 package aulas.umc.oo.UseCase;
 
-import aulas.umc.oo.DTO.*;
+import aulas.umc.oo.DTO.PagamentoRequest;
+import aulas.umc.oo.DTO.PagamentoResponse;
+import aulas.umc.oo.exception.PagamentoUseCaseException;
 import aulas.umc.oo.mapper.PagamentoMapper;
-import aulas.umc.oo.model.*;
-import aulas.umc.oo.repository.*;
-import java.util.*;
+import aulas.umc.oo.model.Pagamento;
+import aulas.umc.oo.model.Pedido;
+import aulas.umc.oo.model.StatusPagamento;
+import aulas.umc.oo.model.StatusPedido;
+import aulas.umc.oo.repository.PagamentoRepository;
+import aulas.umc.oo.repository.PedidoRepository;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PagamentoUseCase {
-    private final PagamentoRepository repo;
-    private final PedidoRepository pedidoRepo;
+
+    private final PagamentoRepository repository;
+    private final PedidoRepository pedidoRepository;
     private final PagamentoMapper mapper;
 
-    public PagamentoUseCase(PagamentoRepository r, PedidoRepository p, PagamentoMapper m) {
-        repo = r;
-        pedidoRepo = p;
-        mapper = m;
+    public PagamentoUseCase(
+            PagamentoRepository repository, PedidoRepository pedidoRepository, PagamentoMapper mapper) {
+        this.repository = repository;
+        this.pedidoRepository = pedidoRepository;
+        this.mapper = mapper;
     }
 
-    public PagamentoResponse criar(PagamentoRequest r) {
-        Pedido pedido = pedidoRepo
-                .findById(r.pedidoId())
-                .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
-        if (pedido.status != StatusPedido.AGUARDANDO_PAGAMENTO)
-            throw new IllegalStateException("Pagamento so pode ser criado para pedido aguardando pagamento");
-        if (r.valor().compareTo(pedido.total) != 0)
-            throw new IllegalArgumentException("Valor do pagamento diferente do total do pedido");
-        if (repo.findByPedidoId(r.pedidoId()).isPresent())
-            throw new IllegalStateException("Pedido ja possui pagamento");
-        Pagamento p = new Pagamento();
-        p.pedidoId = r.pedidoId();
-        p.valor = r.valor();
-        p.meio = r.meio();
-        return mapper.toResponse(repo.insert(p));
+    public PagamentoResponse criar(PagamentoRequest request) {
+        Pedido pedido = pedidoRepository.findById(request.pedidoId())
+                .orElseThrow(() -> new PagamentoUseCaseException("PAG-001", "Pedido nao encontrado"));
+
+        if (pedido.status != StatusPedido.AGUARDANDO_PAGAMENTO) {
+            throw new PagamentoUseCaseException(
+                    "PAG-002", "Pagamento so pode ser criado para pedido aguardando pagamento");
+        }
+
+        if (request.valor().compareTo(pedido.total) != 0) {
+            throw new PagamentoUseCaseException(
+                    "PAG-003", "Valor do pagamento diferente do total do pedido");
+        }
+
+        if (repository.findByPedidoId(request.pedidoId()).isPresent()) {
+            throw new PagamentoUseCaseException("PAG-004", "Pedido ja possui pagamento");
+        }
+
+        Pagamento pagamento = new Pagamento();
+        pagamento.pedidoId = request.pedidoId();
+        pagamento.valor = request.valor();
+        pagamento.meio = request.meio();
+
+        return mapper.toResponse(repository.insert(pagamento));
     }
 
     public List<PagamentoResponse> listar() {
-        return repo.findAll().stream().map(mapper::toResponse).toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     public PagamentoResponse buscar(UUID id) {
-        return mapper.toResponse(
-                repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Pagamento nao encontrado")));
+        return mapper.toResponse(repository.findById(id)
+                .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado")));
     }
 
-    public PagamentoResponse atualizar(UUID id, PagamentoRequest r) {
-        Pagamento p = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Pagamento nao encontrado"));
-        if (p.status != StatusPagamento.PENDENTE)
-            throw new IllegalStateException("Somente pagamento PENDENTE pode ser editado");
-        if (!p.pedidoId.equals(r.pedidoId()))
-            throw new IllegalArgumentException("Nao e permitido trocar o pedido de um pagamento");
-        Pedido pedido = pedidoRepo
-                .findById(p.pedidoId)
-                .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
-        if (r.valor().compareTo(pedido.total) != 0)
-            throw new IllegalArgumentException("Valor do pagamento diferente do total do pedido");
-        p.valor = r.valor();
-        p.meio = r.meio();
-        return mapper.toResponse(repo.update(p));
+    public PagamentoResponse atualizar(UUID id, PagamentoRequest request) {
+        Pagamento pagamento = repository.findById(id)
+                .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado"));
+
+        if (pagamento.status != StatusPagamento.PENDENTE) {
+            throw new PagamentoUseCaseException("PAG-005", "Somente pagamento PENDENTE pode ser editado");
+        }
+
+        if (!pagamento.pedidoId.equals(request.pedidoId())) {
+            throw new PagamentoUseCaseException(
+                    "PAG-006", "Nao e permitido trocar o pedido de um pagamento");
+        }
+
+        Pedido pedido = pedidoRepository.findById(pagamento.pedidoId)
+                .orElseThrow(() -> new PagamentoUseCaseException("PAG-001", "Pedido nao encontrado"));
+
+        if (request.valor().compareTo(pedido.total) != 0) {
+            throw new PagamentoUseCaseException(
+                    "PAG-003", "Valor do pagamento diferente do total do pedido");
+        }
+
+        pagamento.valor = request.valor();
+        pagamento.meio = request.meio();
+        return mapper.toResponse(repository.update(pagamento));
     }
 
     public void excluir(UUID id) {
-        Pagamento p = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Pagamento nao encontrado"));
-        if (p.status != StatusPagamento.PENDENTE)
-            throw new IllegalStateException("Somente pagamento PENDENTE pode ser excluido");
-        repo.delete(id);
+        Pagamento pagamento = repository.findById(id)
+                .orElseThrow(() -> new PagamentoUseCaseException("PAG-404", "Pagamento nao encontrado"));
+
+        if (pagamento.status != StatusPagamento.PENDENTE) {
+            throw new PagamentoUseCaseException(
+                    "PAG-007", "Somente pagamento PENDENTE pode ser excluido");
+        }
+
+        repository.delete(id);
     }
 }

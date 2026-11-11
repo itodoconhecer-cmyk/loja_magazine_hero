@@ -1,16 +1,19 @@
 package aulas.umc.oo.DTO;
 
-import aulas.umc.oo.model.*;
+import aulas.umc.oo.model.StatusPedido;
+import aulas.umc.oo.model.TipoFrete;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PedidoResponse(
-        UUID id,
-        UUID clienteId,
-        UUID carrinhoId,
-        StatusPedido status,
-        TipoFrete tipoFrete,
-        BigDecimal subtotal,
-        BigDecimal valorFrete,
-        BigDecimal total,
+        @NotNull UUID id,
+        @NotNull UUID clienteId,
+        @NotNull UUID carrinhoId,
+        @NotNull StatusPedido status,
+        @NotNull TipoFrete tipoFrete,
+        @NotNull @PositiveOrZero BigDecimal subtotal,
+        @NotNull @PositiveOrZero BigDecimal valorFrete,
+        @NotNull @PositiveOrZero BigDecimal total,
         boolean ativo) {}

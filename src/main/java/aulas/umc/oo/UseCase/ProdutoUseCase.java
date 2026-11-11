@@ -2,6 +2,7 @@ package aulas.umc.oo.UseCase;
 
 import aulas.umc.oo.DTO.ProdutoRequest;
 import aulas.umc.oo.DTO.ProdutoResponse;
+import aulas.umc.oo.exception.ProdutoUseCaseException;
 import aulas.umc.oo.mapper.ProdutoMapper;
 import aulas.umc.oo.model.Produto;
 import aulas.umc.oo.repository.ProdutoRepository;
@@ -29,13 +30,13 @@ public class ProdutoUseCase {
     }
 
     public ProdutoResponse buscar(UUID id) {
-        return mapper.toResponse(
-                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado")));
+        return mapper.toResponse(repository.findById(id)
+                .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado")));
     }
 
     public ProdutoResponse atualizar(UUID id, ProdutoRequest request) {
-        Produto produto =
-                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+        Produto produto = repository.findById(id)
+                .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado"));
 
         produto.nome = request.nome();
         produto.preco = request.preco();
@@ -44,6 +45,8 @@ public class ProdutoUseCase {
     }
 
     public void excluir(UUID id) {
+        repository.findById(id)
+                .orElseThrow(() -> new ProdutoUseCaseException("PRO-404", "Produto nao encontrado"));
         repository.deleteLogical(id);
     }
 }

@@ -1,52 +1,70 @@
 package aulas.umc.oo.UseCase;
 
-import aulas.umc.oo.DTO.*;
+import aulas.umc.oo.DTO.PedidoRequest;
+import aulas.umc.oo.DTO.PedidoResponse;
+import aulas.umc.oo.exception.PedidoUseCaseException;
 import aulas.umc.oo.mapper.PedidoMapper;
-import aulas.umc.oo.model.*;
-import aulas.umc.oo.repository.*;
-import java.util.*;
+import aulas.umc.oo.model.Carrinho;
+import aulas.umc.oo.model.Pedido;
+import aulas.umc.oo.repository.CarrinhoRepository;
+import aulas.umc.oo.repository.ClienteRepository;
+import aulas.umc.oo.repository.PedidoRepository;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PedidoUseCase {
-    private final PedidoRepository repo;
-    private final ClienteRepository clienteRepo;
-    private final CarrinhoRepository carrinhoRepo;
+
+    private final PedidoRepository repository;
+    private final ClienteRepository clienteRepository;
+    private final CarrinhoRepository carrinhoRepository;
     private final PedidoMapper mapper;
 
-    public PedidoUseCase(PedidoRepository r, ClienteRepository c, CarrinhoRepository ca, PedidoMapper m) {
-        repo = r;
-        clienteRepo = c;
-        carrinhoRepo = ca;
-        mapper = m;
+    public PedidoUseCase(
+            PedidoRepository repository,
+            ClienteRepository clienteRepository,
+            CarrinhoRepository carrinhoRepository,
+            PedidoMapper mapper) {
+        this.repository = repository;
+        this.clienteRepository = clienteRepository;
+        this.carrinhoRepository = carrinhoRepository;
+        this.mapper = mapper;
     }
 
-    public PedidoResponse criar(PedidoRequest r) {
-        clienteRepo.findById(r.clienteId()).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado"));
-        Carrinho carrinho = carrinhoRepo
-                .findById(r.carrinhoId())
-                .orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado"));
-        if (!carrinho.clienteId.equals(r.clienteId()))
-            throw new IllegalArgumentException("Carrinho pertence a outro cliente");
-        if (repo.findByCarrinhoId(r.carrinhoId()).isPresent())
-            throw new IllegalStateException("Carrinho ja possui pedido ativo");
-        Pedido p = new Pedido();
-        p.clienteId = r.clienteId();
-        p.carrinhoId = r.carrinhoId();
-        p.tipoFrete = r.tipoFrete();
-        return mapper.toResponse(repo.insert(p));
+    public PedidoResponse criar(PedidoRequest request) {
+        clienteRepository.findById(request.clienteId())
+                .orElseThrow(() -> new PedidoUseCaseException("PED-001", "Cliente do pedido nao encontrado"));
+
+        Carrinho carrinho = carrinhoRepository.findById(request.carrinhoId())
+                .orElseThrow(() -> new PedidoUseCaseException("PED-002", "Carrinho do pedido nao encontrado"));
+
+        if (!carrinho.clienteId.equals(request.clienteId())) {
+            throw new PedidoUseCaseException("PED-003", "Carrinho pertence a outro cliente");
+        }
+
+        if (repository.findByCarrinhoId(request.carrinhoId()).isPresent()) {
+            throw new PedidoUseCaseException("PED-004", "Carrinho ja possui pedido ativo");
+        }
+
+        Pedido pedido = new Pedido();
+        pedido.clienteId = request.clienteId();
+        pedido.carrinhoId = request.carrinhoId();
+        pedido.tipoFrete = request.tipoFrete();
+        return mapper.toResponse(repository.insert(pedido));
     }
 
     public List<PedidoResponse> listar() {
-        return repo.findAll().stream().map(mapper::toResponse).toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     public PedidoResponse buscar(UUID id) {
-        return mapper.toResponse(
-                repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado")));
+        return mapper.toResponse(repository.findById(id)
+                .orElseThrow(() -> new PedidoUseCaseException("PED-404", "Pedido nao encontrado")));
     }
 
     public void excluirCrud(UUID id) {
-        throw new IllegalStateException("Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
+        throw new PedidoUseCaseException(
+                "PED-005", "Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
     }
 }

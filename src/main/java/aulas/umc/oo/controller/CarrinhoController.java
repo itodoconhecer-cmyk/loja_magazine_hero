@@ -1,54 +1,68 @@
 package aulas.umc.oo.controller;
 
-import aulas.umc.oo.DTO.*;
-import aulas.umc.oo.UseCase.*;
+import aulas.umc.oo.DTO.CarrinhoRequest;
+import aulas.umc.oo.DTO.CarrinhoResponse;
+import aulas.umc.oo.DTO.ItemCarrinhoRequest;
+import aulas.umc.oo.DTO.PipelineResponse;
+import aulas.umc.oo.UseCase.CarrinhoUseCase;
+import aulas.umc.oo.UseCase.ProcessoPedidoUseCase;
 import jakarta.validation.Valid;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carrinhos")
 public class CarrinhoController {
-    private final CarrinhoUseCase uc;
-    private final ProcessoPedidoUseCase proc;
 
-    public CarrinhoController(CarrinhoUseCase u, ProcessoPedidoUseCase p) {
-        uc = u;
-        proc = p;
+    private final CarrinhoUseCase useCase;
+    private final ProcessoPedidoUseCase processoUseCase;
+
+    public CarrinhoController(CarrinhoUseCase useCase, ProcessoPedidoUseCase processoUseCase) {
+        this.useCase = useCase;
+        this.processoUseCase = processoUseCase;
     }
 
     @PostMapping
-    public CarrinhoResponse criar(@Valid @RequestBody CarrinhoRequest r) {
-        return uc.criar(r);
+    @PreAuthorize("hasAuthority('CARRINHO_ESCREVER')")
+    public CarrinhoResponse criar(@Valid @RequestBody CarrinhoRequest request) {
+        return useCase.criar(request);
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('CARRINHO_LER')")
     public List<CarrinhoResponse> listar() {
-        return uc.listar();
+        return useCase.listar();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('CARRINHO_LER')")
     public CarrinhoResponse buscar(@PathVariable UUID id) {
-        return uc.buscar(id);
+        return useCase.buscar(id);
     }
 
     @PutMapping("/{id}")
-    public CarrinhoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody CarrinhoRequest r) {
-        return uc.atualizar(id, r);
+    @PreAuthorize("hasAuthority('CARRINHO_ESCREVER')")
+    public CarrinhoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody CarrinhoRequest request) {
+        return useCase.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('CARRINHO_ESCREVER')")
     public void excluir(@PathVariable UUID id) {
-        uc.excluir(id);
+        useCase.excluir(id);
     }
 
     @PostMapping("/{id}/itens")
-    public CarrinhoResponse item(@PathVariable UUID id, @Valid @RequestBody ItemCarrinhoRequest r) {
-        return uc.adicionarItem(id, r);
+    @PreAuthorize("hasAuthority('CARRINHO_ESCREVER')")
+    public CarrinhoResponse adicionarItem(@PathVariable UUID id, @Valid @RequestBody ItemCarrinhoRequest request) {
+        return useCase.adicionarItem(id, request);
     }
 
     @PostMapping("/{id}/processos/esvaziar")
+    @PreAuthorize("hasAuthority('CARRINHO_PROCESSAR')")
     public PipelineResponse esvaziar(@PathVariable UUID id) {
-        return proc.esvaziarCarrinho(id);
+        return processoUseCase.esvaziarCarrinho(id);
     }
 }

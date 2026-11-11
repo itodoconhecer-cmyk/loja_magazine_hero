@@ -1,69 +1,100 @@
 package aulas.umc.oo.UseCase;
 
-import aulas.umc.oo.DTO.*;
-import aulas.umc.oo.model.*;
-import aulas.umc.oo.repository.*;
-import java.util.*;
+import aulas.umc.oo.DTO.CarrinhoRequest;
+import aulas.umc.oo.DTO.CarrinhoResponse;
+import aulas.umc.oo.DTO.ItemCarrinhoRequest;
+import aulas.umc.oo.DTO.ItemCarrinhoResponse;
+import aulas.umc.oo.exception.CarrinhoUseCaseException;
+import aulas.umc.oo.model.Carrinho;
+import aulas.umc.oo.model.ItemCarrinho;
+import aulas.umc.oo.repository.CarrinhoRepository;
+import aulas.umc.oo.repository.ClienteRepository;
+import aulas.umc.oo.repository.PedidoRepository;
+import aulas.umc.oo.repository.ProdutoRepository;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CarrinhoUseCase {
-    private final CarrinhoRepository repo;
-    private final ClienteRepository clienteRepo;
-    private final ProdutoRepository produtoRepo;
-    private final PedidoRepository pedidoRepo;
 
-    public CarrinhoUseCase(CarrinhoRepository r, ClienteRepository c, ProdutoRepository p, PedidoRepository pr) {
-        repo = r;
-        clienteRepo = c;
-        produtoRepo = p;
-        pedidoRepo = pr;
+    private final CarrinhoRepository repository;
+    private final ClienteRepository clienteRepository;
+    private final ProdutoRepository produtoRepository;
+    private final PedidoRepository pedidoRepository;
+
+    public CarrinhoUseCase(
+            CarrinhoRepository repository,
+            ClienteRepository clienteRepository,
+            ProdutoRepository produtoRepository,
+            PedidoRepository pedidoRepository) {
+        this.repository = repository;
+        this.clienteRepository = clienteRepository;
+        this.produtoRepository = produtoRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
-    public CarrinhoResponse criar(CarrinhoRequest r) {
-        clienteRepo.findById(r.clienteId()).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado"));
-        return resp(repo.insert(new Carrinho(r.clienteId())));
+    public CarrinhoResponse criar(CarrinhoRequest request) {
+        clienteRepository.findById(request.clienteId())
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-001", "Cliente do carrinho nao encontrado"));
+
+        return toResponse(repository.insert(new Carrinho(request.clienteId())));
     }
 
     public List<CarrinhoResponse> listar() {
-        return repo.findAll().stream().map(this::resp).toList();
+        return repository.findAll().stream().map(this::toResponse).toList();
     }
 
     public CarrinhoResponse buscar(UUID id) {
-        return resp(repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado")));
+        return toResponse(repository.findById(id)
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado")));
     }
 
-    public CarrinhoResponse atualizar(UUID id, CarrinhoRequest r) {
+    public CarrinhoResponse atualizar(UUID id, CarrinhoRequest request) {
         validarCarrinhoNaoConvertidoEmPedido(id);
-        clienteRepo.findById(r.clienteId()).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado"));
-        Carrinho c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado"));
-        c.clienteId = r.clienteId();
-        return resp(repo.update(c));
+
+        clienteRepository.findById(request.clienteId())
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-001", "Cliente do carrinho nao encontrado"));
+
+        Carrinho carrinho = repository.findById(id)
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
+
+        carrinho.clienteId = request.clienteId();
+        return toResponse(repository.update(carrinho));
     }
 
     public void excluir(UUID id) {
+        repository.findById(id)
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
         validarCarrinhoNaoConvertidoEmPedido(id);
-        repo.deleteLogical(id);
+        repository.deleteLogical(id);
     }
 
-    public CarrinhoResponse adicionarItem(UUID id, ItemCarrinhoRequest r) {
+    public CarrinhoResponse adicionarItem(UUID id, ItemCarrinhoRequest request) {
+        repository.findById(id)
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-404", "Carrinho nao encontrado"));
+
         validarCarrinhoNaoConvertidoEmPedido(id);
-        repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado"));
-        produtoRepo.findById(r.produtoId()).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
-        repo.addItem(new ItemCarrinho(id, r.produtoId(), r.quantidade()));
+
+        produtoRepository.findById(request.produtoId())
+                .orElseThrow(() -> new CarrinhoUseCaseException("CAR-002", "Produto do item nao encontrado"));
+
+        repository.addItem(new ItemCarrinho(id, request.produtoId(), request.quantidade()));
         return buscar(id);
     }
 
     private void validarCarrinhoNaoConvertidoEmPedido(UUID carrinhoId) {
-        if (pedidoRepo.findByCarrinhoId(carrinhoId).isPresent()) {
-            throw new IllegalStateException("Carrinho ja foi convertido em pedido e nao pode mais ser alterado");
+        if (pedidoRepository.findByCarrinhoId(carrinhoId).isPresent()) {
+            throw new CarrinhoUseCaseException(
+                    "CAR-003", "Carrinho ja foi convertido em pedido e nao pode mais ser alterado");
         }
     }
 
-    private CarrinhoResponse resp(Carrinho c) {
-        var itens = repo.findItems(c.id).stream()
-                .map(i -> new ItemCarrinhoResponse(i.id, i.produtoId, i.quantidade))
+    private CarrinhoResponse toResponse(Carrinho carrinho) {
+        var itens = repository.findItems(carrinho.id).stream()
+                .map(item -> new ItemCarrinhoResponse(item.id, item.produtoId, item.quantidade))
                 .toList();
-        return new CarrinhoResponse(c.id, c.clienteId, c.ativo, itens);
+
+        return new CarrinhoResponse(carrinho.id, carrinho.clienteId, carrinho.ativo, itens);
     }
 }

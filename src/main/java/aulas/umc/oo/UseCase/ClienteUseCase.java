@@ -1,42 +1,51 @@
 package aulas.umc.oo.UseCase;
 
-import aulas.umc.oo.DTO.*;
+import aulas.umc.oo.DTO.ClienteRequest;
+import aulas.umc.oo.DTO.ClienteResponse;
+import aulas.umc.oo.exception.ClienteUseCaseException;
 import aulas.umc.oo.mapper.ClienteMapper;
 import aulas.umc.oo.model.Cliente;
 import aulas.umc.oo.repository.ClienteRepository;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ClienteUseCase {
-    private final ClienteRepository repo;
+
+    private final ClienteRepository repository;
     private final ClienteMapper mapper;
 
-    public ClienteUseCase(ClienteRepository r, ClienteMapper m) {
-        repo = r;
-        mapper = m;
+    public ClienteUseCase(ClienteRepository repository, ClienteMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public ClienteResponse criar(ClienteRequest r) {
-        return mapper.toResponse(repo.insert(mapper.toDomain(r)));
+    public ClienteResponse criar(ClienteRequest request) {
+        return mapper.toResponse(repository.insert(mapper.toDomain(request)));
     }
 
     public List<ClienteResponse> listar() {
-        return repo.findAll().stream().map(mapper::toResponse).toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     public ClienteResponse buscar(UUID id) {
-        return mapper.toResponse(
-                repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado")));
+        return mapper.toResponse(repository.findById(id)
+                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado")));
     }
 
-    public ClienteResponse atualizar(UUID id, ClienteRequest r) {
-        Cliente c = mapper.toDomain(r);
-        c.id = id;
-        return mapper.toResponse(repo.update(c));
+    public ClienteResponse atualizar(UUID id, ClienteRequest request) {
+        repository.findById(id)
+                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado"));
+
+        Cliente cliente = mapper.toDomain(request);
+        cliente.id = id;
+        return mapper.toResponse(repository.update(cliente));
     }
 
     public void excluir(UUID id) {
-        repo.deleteLogical(id);
+        repository.findById(id)
+                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado"));
+        repository.deleteLogical(id);
     }
 }

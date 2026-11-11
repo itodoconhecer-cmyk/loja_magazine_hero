@@ -1,6 +1,9 @@
 package aulas.umc.oo.DTO;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.UUID;
 
-/** Projecao calculada do estoque. Nao e um atributo persistido de Produto. */
-public record SaldoEstoqueResponse(UUID produtoId, long saldo) {}
+public record SaldoEstoqueResponse(
+        @NotNull UUID produtoId,
+        @PositiveOrZero long saldo) {}
