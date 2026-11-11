@@ -6,9 +6,8 @@ import aulas.umc.oo.pipeline.Processo;
 import aulas.umc.oo.repository.MovimentacaoEstoqueRepository;
 import aulas.umc.oo.repository.ProdutoRepository;
 import aulas.umc.oo.strategy.ProcessStrategy;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ValidarMovimentacaoSaidaStrategy implements ProcessStrategy {
@@ -17,9 +16,7 @@ public class ValidarMovimentacaoSaidaStrategy implements ProcessStrategy {
     private final MovimentacaoEstoqueRepository movimentacaoRepository;
 
     public ValidarMovimentacaoSaidaStrategy(
-            ProdutoRepository produtoRepository,
-            MovimentacaoEstoqueRepository movimentacaoRepository
-    ) {
+            ProdutoRepository produtoRepository, MovimentacaoEstoqueRepository movimentacaoRepository) {
         this.produtoRepository = produtoRepository;
         this.movimentacaoRepository = movimentacaoRepository;
     }
@@ -48,7 +45,8 @@ public class ValidarMovimentacaoSaidaStrategy implements ProcessStrategy {
             throw new IllegalArgumentException("Quantidade deve ser positiva");
         }
 
-        Produto produto = produtoRepository.findById(produtoId)
+        Produto produto = produtoRepository
+                .findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado ou inativo"));
 
         // O lock do produto serializa as movimentacoes concorrentes.
@@ -56,9 +54,7 @@ public class ValidarMovimentacaoSaidaStrategy implements ProcessStrategy {
 
         long saldo = movimentacaoRepository.calcularSaldo(produtoId);
         if (saldo < quantidade) {
-            throw new IllegalStateException(
-                    "Estoque insuficiente. Saldo atual: " + saldo
-            );
+            throw new IllegalStateException("Estoque insuficiente. Saldo atual: " + saldo);
         }
 
         context.put("produto", produto);

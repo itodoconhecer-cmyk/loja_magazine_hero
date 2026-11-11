@@ -1,2 +1,42 @@
-package aulas.umc.oo.controller; import aulas.umc.oo.DTO.*; import aulas.umc.oo.UseCase.ProdutoUseCase; import jakarta.validation.Valid; import org.springframework.web.bind.annotation.*; import java.util.*;
-@RestController @RequestMapping("/api/produtos") public class ProdutoController { private final ProdutoUseCase uc; public ProdutoController(ProdutoUseCase u){uc=u;} @PostMapping public ProdutoResponse criar(@Valid @RequestBody ProdutoRequest r){return uc.criar(r);} @GetMapping public List<ProdutoResponse> listar(){return uc.listar();} @GetMapping("/{id}") public ProdutoResponse buscar(@PathVariable UUID id){return uc.buscar(id);} @PutMapping("/{id}") public ProdutoResponse atualizar(@PathVariable UUID id,@Valid @RequestBody ProdutoRequest r){return uc.atualizar(id,r);} @DeleteMapping("/{id}") public void excluir(@PathVariable UUID id){uc.excluir(id);} }
+package aulas.umc.oo.controller;
+
+import aulas.umc.oo.DTO.*;
+import aulas.umc.oo.UseCase.ProdutoUseCase;
+import jakarta.validation.Valid;
+import java.util.*;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/produtos")
+public class ProdutoController {
+    private final ProdutoUseCase uc;
+
+    public ProdutoController(ProdutoUseCase u) {
+        uc = u;
+    }
+
+    @PostMapping
+    public ProdutoResponse criar(@Valid @RequestBody ProdutoRequest r) {
+        return uc.criar(r);
+    }
+
+    @GetMapping
+    public List<ProdutoResponse> listar() {
+        return uc.listar();
+    }
+
+    @GetMapping("/{id}")
+    public ProdutoResponse buscar(@PathVariable UUID id) {
+        return uc.buscar(id);
+    }
+
+    @PutMapping("/{id}")
+    public ProdutoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody ProdutoRequest r) {
+        return uc.atualizar(id, r);
+    }
+
+    @DeleteMapping("/{id}")
+    public void excluir(@PathVariable UUID id) {
+        uc.excluir(id);
+    }
+}

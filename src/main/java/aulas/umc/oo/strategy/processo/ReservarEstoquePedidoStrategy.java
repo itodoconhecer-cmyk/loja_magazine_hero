@@ -8,19 +8,16 @@ import aulas.umc.oo.pipeline.ProcessContext;
 import aulas.umc.oo.pipeline.Processo;
 import aulas.umc.oo.repository.MovimentacaoEstoqueRepository;
 import aulas.umc.oo.strategy.ProcessStrategy;
-import org.springframework.stereotype.Component;
-
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ReservarEstoquePedidoStrategy implements ProcessStrategy {
 
     private final MovimentacaoEstoqueRepository movimentacaoRepository;
 
-    public ReservarEstoquePedidoStrategy(
-            MovimentacaoEstoqueRepository movimentacaoRepository
-    ) {
+    public ReservarEstoquePedidoStrategy(MovimentacaoEstoqueRepository movimentacaoRepository) {
         this.movimentacaoRepository = movimentacaoRepository;
     }
 
@@ -57,9 +54,7 @@ public class ReservarEstoquePedidoStrategy implements ProcessStrategy {
             long saldo = movimentacaoRepository.calcularSaldo(item.produtoId);
             if (saldo < item.quantidade) {
                 throw new IllegalStateException(
-                        "Estoque insuficiente para o produto " + item.produtoId
-                                + ". Saldo atual: " + saldo
-                );
+                        "Estoque insuficiente para o produto " + item.produtoId + ". Saldo atual: " + saldo);
             }
 
             MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();

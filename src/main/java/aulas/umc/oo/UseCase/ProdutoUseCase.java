@@ -5,10 +5,9 @@ import aulas.umc.oo.DTO.ProdutoResponse;
 import aulas.umc.oo.mapper.ProdutoMapper;
 import aulas.umc.oo.model.Produto;
 import aulas.umc.oo.repository.ProdutoRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ProdutoUseCase {
@@ -26,21 +25,17 @@ public class ProdutoUseCase {
     }
 
     public List<ProdutoResponse> listar() {
-        return repository.findAll().stream()
-                .map(mapper::toResponse)
-                .toList();
+        return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     public ProdutoResponse buscar(UUID id) {
         return mapper.toResponse(
-                repository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"))
-        );
+                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado")));
     }
 
     public ProdutoResponse atualizar(UUID id, ProdutoRequest request) {
-        Produto produto = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+        Produto produto =
+                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
 
         produto.nome = request.nome();
         produto.preco = request.preco();

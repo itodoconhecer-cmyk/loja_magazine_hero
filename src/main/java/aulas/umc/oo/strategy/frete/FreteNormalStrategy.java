@@ -1,2 +1,16 @@
-package aulas.umc.oo.strategy.frete; import aulas.umc.oo.model.TipoFrete; import org.springframework.stereotype.Component; import java.math.BigDecimal;
-@Component public class FreteNormalStrategy implements FreteStrategy { public TipoFrete tipo(){return TipoFrete.NORMAL;} public BigDecimal calcular(BigDecimal subtotal){return subtotal.compareTo(new BigDecimal("200"))>=0?BigDecimal.ZERO:new BigDecimal("15.00");} }
+package aulas.umc.oo.strategy.frete;
+
+import aulas.umc.oo.model.TipoFrete;
+import java.math.BigDecimal;
+import org.springframework.stereotype.Component;
+
+@Component
+public class FreteNormalStrategy implements FreteStrategy {
+    public TipoFrete tipo() {
+        return TipoFrete.NORMAL;
+    }
+
+    public BigDecimal calcular(BigDecimal subtotal) {
+        return subtotal.compareTo(new BigDecimal("200")) >= 0 ? BigDecimal.ZERO : new BigDecimal("15.00");
+    }
+}

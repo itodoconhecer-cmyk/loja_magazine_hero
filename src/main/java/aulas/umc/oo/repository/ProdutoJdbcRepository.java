@@ -1,14 +1,13 @@
 package aulas.umc.oo.repository;
 
 import aulas.umc.oo.model.Produto;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class ProdutoJdbcRepository implements ProdutoRepository {
@@ -26,35 +25,33 @@ public class ProdutoJdbcRepository implements ProdutoRepository {
                 produto.id,
                 produto.nome,
                 produto.preco,
-                produto.ativo
-        );
+                produto.ativo);
         return produto;
     }
 
     @Override
     public List<Produto> findAll() {
         return jdbc.query(
-                "select id, nome, preco, ativo from produto where ativo = true order by nome",
-                (rs, rowNum) -> map(rs)
-        );
+                "select id, nome, preco, ativo from produto where ativo = true order by nome", (rs, rowNum) -> map(rs));
     }
 
     @Override
     public Optional<Produto> findById(UUID id) {
-        return jdbc.query(
-                "select id, nome, preco, ativo from produto where id = ? and ativo = true",
-                (rs, rowNum) -> map(rs),
-                id
-        ).stream().findFirst();
+        return jdbc
+                .query(
+                        "select id, nome, preco, ativo from produto where id = ? and ativo = true",
+                        (rs, rowNum) -> map(rs),
+                        id)
+                .stream()
+                .findFirst();
     }
 
     @Override
     public Optional<Produto> findByIdIncludingInactive(UUID id) {
-        return jdbc.query(
-                "select id, nome, preco, ativo from produto where id = ?",
-                (rs, rowNum) -> map(rs),
-                id
-        ).stream().findFirst();
+        return jdbc
+                .query("select id, nome, preco, ativo from produto where id = ?", (rs, rowNum) -> map(rs), id)
+                .stream()
+                .findFirst();
     }
 
     @Override
@@ -63,8 +60,7 @@ public class ProdutoJdbcRepository implements ProdutoRepository {
                 "update produto set nome = ?, preco = ? where id = ? and ativo = true",
                 produto.nome,
                 produto.preco,
-                produto.id
-        );
+                produto.id);
 
         if (linhas == 0) {
             throw new RepositoryException("Produto nao encontrado");

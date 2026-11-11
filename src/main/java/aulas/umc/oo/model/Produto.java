@@ -6,9 +6,8 @@ import java.util.UUID;
 /**
  * Produto representa apenas os dados de catalogo.
  *
- * O saldo de estoque nao pertence ao Produto. Ele e calculado a partir
- * do livro-razão de MovimentacaoEstoque:
- * saldo = soma(ENTRADA) - soma(SAIDA).
+ * <p>O saldo de estoque nao pertence ao Produto. Ele e calculado a partir do livro-razão de MovimentacaoEstoque: saldo
+ * = soma(ENTRADA) - soma(SAIDA).
  */
 public class Produto extends Domain {
     public String nome;

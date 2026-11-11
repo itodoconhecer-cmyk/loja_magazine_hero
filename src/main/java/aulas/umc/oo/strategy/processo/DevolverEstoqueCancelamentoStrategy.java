@@ -22,8 +22,7 @@ public class DevolverEstoqueCancelamentoStrategy implements ProcessStrategy {
     public DevolverEstoqueCancelamentoStrategy(
             PedidoRepository pedidoRepository,
             ProdutoRepository produtoRepository,
-            MovimentacaoEstoqueRepository movimentacaoRepository
-    ) {
+            MovimentacaoEstoqueRepository movimentacaoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
         this.movimentacaoRepository = movimentacaoRepository;
@@ -53,7 +52,8 @@ public class DevolverEstoqueCancelamentoStrategy implements ProcessStrategy {
         }
 
         for (var item : pedidoRepository.findItems(pedido.id)) {
-            produtoRepository.findByIdIncludingInactive(item.produtoId)
+            produtoRepository
+                    .findByIdIncludingInactive(item.produtoId)
                     .orElseThrow(() -> new IllegalArgumentException("Produto do pedido nao encontrado"));
 
             movimentacaoRepository.bloquearProduto(item.produtoId);

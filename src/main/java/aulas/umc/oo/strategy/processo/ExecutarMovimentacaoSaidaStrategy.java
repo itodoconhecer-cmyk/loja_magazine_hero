@@ -14,9 +14,7 @@ public class ExecutarMovimentacaoSaidaStrategy implements ProcessStrategy {
 
     private final MovimentacaoEstoqueRepository movimentacaoRepository;
 
-    public ExecutarMovimentacaoSaidaStrategy(
-            MovimentacaoEstoqueRepository movimentacaoRepository
-    ) {
+    public ExecutarMovimentacaoSaidaStrategy(MovimentacaoEstoqueRepository movimentacaoRepository) {
         this.movimentacaoRepository = movimentacaoRepository;
     }
 

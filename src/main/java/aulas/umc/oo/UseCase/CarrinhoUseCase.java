@@ -3,8 +3,8 @@ package aulas.umc.oo.UseCase;
 import aulas.umc.oo.DTO.*;
 import aulas.umc.oo.model.*;
 import aulas.umc.oo.repository.*;
-import org.springframework.stereotype.Service;
 import java.util.*;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CarrinhoUseCase {
@@ -14,7 +14,10 @@ public class CarrinhoUseCase {
     private final PedidoRepository pedidoRepo;
 
     public CarrinhoUseCase(CarrinhoRepository r, ClienteRepository c, ProdutoRepository p, PedidoRepository pr) {
-        repo = r; clienteRepo = c; produtoRepo = p; pedidoRepo = pr;
+        repo = r;
+        clienteRepo = c;
+        produtoRepo = p;
+        pedidoRepo = pr;
     }
 
     public CarrinhoResponse criar(CarrinhoRequest r) {
@@ -22,8 +25,13 @@ public class CarrinhoUseCase {
         return resp(repo.insert(new Carrinho(r.clienteId())));
     }
 
-    public List<CarrinhoResponse> listar() { return repo.findAll().stream().map(this::resp).toList(); }
-    public CarrinhoResponse buscar(UUID id) { return resp(repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado"))); }
+    public List<CarrinhoResponse> listar() {
+        return repo.findAll().stream().map(this::resp).toList();
+    }
+
+    public CarrinhoResponse buscar(UUID id) {
+        return resp(repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Carrinho nao encontrado")));
+    }
 
     public CarrinhoResponse atualizar(UUID id, CarrinhoRequest r) {
         validarCarrinhoNaoConvertidoEmPedido(id);
@@ -53,7 +61,9 @@ public class CarrinhoUseCase {
     }
 
     private CarrinhoResponse resp(Carrinho c) {
-        var itens = repo.findItems(c.id).stream().map(i -> new ItemCarrinhoResponse(i.id, i.produtoId, i.quantidade)).toList();
+        var itens = repo.findItems(c.id).stream()
+                .map(i -> new ItemCarrinhoResponse(i.id, i.produtoId, i.quantidade))
+                .toList();
         return new CarrinhoResponse(c.id, c.clienteId, c.ativo, itens);
     }
 }

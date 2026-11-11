@@ -9,17 +9,15 @@ import aulas.umc.oo.pipeline.Processo;
 import aulas.umc.oo.repository.PagamentoRepository;
 import aulas.umc.oo.repository.PedidoRepository;
 import aulas.umc.oo.strategy.ProcessStrategy;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ValidarEstornoPagamentoStrategy implements ProcessStrategy {
     private final PagamentoRepository pagamentoRepository;
     private final PedidoRepository pedidoRepository;
 
-    public ValidarEstornoPagamentoStrategy(PagamentoRepository pagamentoRepository,
-                                           PedidoRepository pedidoRepository) {
+    public ValidarEstornoPagamentoStrategy(PagamentoRepository pagamentoRepository, PedidoRepository pedidoRepository) {
         this.pagamentoRepository = pagamentoRepository;
         this.pedidoRepository = pedidoRepository;
     }
@@ -42,14 +40,16 @@ public class ValidarEstornoPagamentoStrategy implements ProcessStrategy {
     @Override
     public void executar(ProcessContext context) {
         UUID pagamentoId = context.get("pagamentoId", UUID.class);
-        Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
+        Pagamento pagamento = pagamentoRepository
+                .findById(pagamentoId)
                 .orElseThrow(() -> new IllegalArgumentException("Pagamento nao encontrado"));
 
         if (pagamento.status != StatusPagamento.APROVADO) {
             throw new IllegalStateException("Somente pagamento APROVADO pode ser estornado");
         }
 
-        Pedido pedido = pedidoRepository.findById(pagamento.pedidoId)
+        Pedido pedido = pedidoRepository
+                .findById(pagamento.pedidoId)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido do pagamento nao encontrado"));
 
         if (pedido.status != StatusPedido.APROVADO) {
