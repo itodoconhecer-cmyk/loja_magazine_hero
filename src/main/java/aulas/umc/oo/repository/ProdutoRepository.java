@@ -1,16 +1,16 @@
 package aulas.umc.oo.repository;
 
 import aulas.umc.oo.model.Produto;
-import java.util.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface ProdutoRepository {
-    Produto insert(Produto p);
+    Produto insert(Produto produto);
     List<Produto> findAll();
     Optional<Produto> findById(UUID id);
     Optional<Produto> findByIdIncludingInactive(UUID id);
-    Produto update(Produto p);
+    Produto update(Produto produto);
     void deleteLogical(UUID id);
-    void atualizarEstoque(UUID id, int novoEstoque);
-    void adicionarEstoque(UUID id, int quantidade, boolean exigirAtivo);
-    void retirarEstoqueSeDisponivel(UUID id, int quantidade);
 }

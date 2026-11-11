@@ -3,8 +3,26 @@
 @produto = 22222222-2222-2222-2222-222222222221
 @carrinho = 33333333-3333-3333-3333-333333333333
 
-### listar produtos
+### listar produtos - Produto nao possui campo estoque
 GET http://localhost:8080/api/produtos
+
+### consultar saldo derivado do historico
+GET http://localhost:8080/api/estoque/produtos/{{produto}}/saldo
+
+### consultar historico do produto
+GET http://localhost:8080/api/estoque/movimentacoes?produtoId={{produto}}
+
+### entrada de estoque
+POST http://localhost:8080/api/estoque/entrada
+Content-Type: application/json
+
+{"produtoId":"{{produto}}","quantidade":5,"motivo":"COMPRA_FORNECEDOR"}
+
+### saida manual de estoque
+POST http://localhost:8080/api/estoque/saida
+Content-Type: application/json
+
+{"produtoId":"{{produto}}","quantidade":1,"motivo":"AJUSTE_SAIDA"}
 
 ### adicionar item ao carrinho
 POST http://localhost:8080/api/carrinhos/{{carrinho}}/itens
@@ -21,7 +39,7 @@ Content-Type: application/json
 ### depois substitua PEDIDO_ID
 POST http://localhost:8080/api/pedidos/PEDIDO_ID/processos/calcular-frete
 
-### aprovar pedido
+### aprovar pedido - registra SAIDA no ledger de estoque
 POST http://localhost:8080/api/pedidos/PEDIDO_ID/processos/aprovar
 
 ### criar pagamento com o total retornado
@@ -33,11 +51,5 @@ Content-Type: application/json
 ### aprovar pagamento
 POST http://localhost:8080/api/pagamentos/PAGAMENTO_ID/processos/aprovar
 
-### entrada de estoque
-POST http://localhost:8080/api/estoque/entrada
-Content-Type: application/json
-
-{"produtoId":"{{produto}}","quantidade":5,"motivo":"Compra fornecedor"}
-
-### estornar pagamento aprovado (substitua PAGAMENTO_ID)
+### estornar pagamento aprovado - registra ENTRADA no ledger
 POST http://localhost:8080/api/pagamentos/PAGAMENTO_ID/processos/estornar

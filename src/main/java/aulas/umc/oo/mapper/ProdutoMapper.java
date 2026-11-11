@@ -1,2 +1,23 @@
-package aulas.umc.oo.mapper; import aulas.umc.oo.DTO.*; import aulas.umc.oo.model.Produto; import org.springframework.stereotype.Component;
-@Component public class ProdutoMapper { public Produto toDomain(ProdutoRequest r){return new Produto(r.nome(),r.preco(),r.estoque());} public ProdutoResponse toResponse(Produto p){return new ProdutoResponse(p.id,p.nome,p.preco,p.estoque,p.ativo);} }
+package aulas.umc.oo.mapper;
+
+import aulas.umc.oo.DTO.ProdutoRequest;
+import aulas.umc.oo.DTO.ProdutoResponse;
+import aulas.umc.oo.model.Produto;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProdutoMapper {
+
+    public Produto toDomain(ProdutoRequest request) {
+        return new Produto(request.nome(), request.preco());
+    }
+
+    public ProdutoResponse toResponse(Produto produto) {
+        return new ProdutoResponse(
+                produto.id,
+                produto.nome,
+                produto.preco,
+                produto.ativo
+        );
+    }
+}

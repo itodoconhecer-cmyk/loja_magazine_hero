@@ -1,2 +1,59 @@
-package aulas.umc.oo.controller; import aulas.umc.oo.DTO.*; import aulas.umc.oo.UseCase.ProcessoPedidoUseCase; import aulas.umc.oo.model.MovimentacaoEstoque; import aulas.umc.oo.repository.MovimentacaoEstoqueRepository; import jakarta.validation.Valid; import org.springframework.web.bind.annotation.*; import java.util.*;
-@RestController @RequestMapping("/api/estoque") public class EstoqueController { private final ProcessoPedidoUseCase proc; private final MovimentacaoEstoqueRepository repo; public EstoqueController(ProcessoPedidoUseCase p,MovimentacaoEstoqueRepository r){proc=p;repo=r;} @GetMapping("/movimentacoes") public List<MovimentacaoEstoque> listar(){return repo.findAll();} @PostMapping("/entrada") public PipelineResponse entrada(@Valid @RequestBody MovimentacaoEstoqueRequest r){return proc.entrada(r.produtoId(),r.quantidade(),r.motivo());} @PostMapping("/saida") public PipelineResponse saida(@Valid @RequestBody MovimentacaoEstoqueRequest r){return proc.saida(r.produtoId(),r.quantidade(),r.motivo());} }
+package aulas.umc.oo.controller;
+
+import aulas.umc.oo.DTO.MovimentacaoEstoqueRequest;
+import aulas.umc.oo.DTO.MovimentacaoEstoqueResponse;
+import aulas.umc.oo.DTO.PipelineResponse;
+import aulas.umc.oo.DTO.SaldoEstoqueResponse;
+import aulas.umc.oo.UseCase.EstoqueConsultaUseCase;
+import aulas.umc.oo.UseCase.ProcessoPedidoUseCase;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/estoque")
+public class EstoqueController {
+
+    private final ProcessoPedidoUseCase processoUseCase;
+    private final EstoqueConsultaUseCase consultaUseCase;
+
+    public EstoqueController(
+            ProcessoPedidoUseCase processoUseCase,
+            EstoqueConsultaUseCase consultaUseCase
+    ) {
+        this.processoUseCase = processoUseCase;
+        this.consultaUseCase = consultaUseCase;
+    }
+
+    @GetMapping("/movimentacoes")
+    public List<MovimentacaoEstoqueResponse> listarMovimentacoes(
+            @RequestParam(required = false) UUID produtoId
+    ) {
+        return consultaUseCase.listarMovimentacoes(produtoId);
+    }
+
+    @GetMapping("/produtos/{produtoId}/saldo")
+    public SaldoEstoqueResponse consultarSaldo(@PathVariable UUID produtoId) {
+        return consultaUseCase.consultarSaldo(produtoId);
+    }
+
+    @PostMapping("/entrada")
+    public PipelineResponse entrada(@Valid @RequestBody MovimentacaoEstoqueRequest request) {
+        return processoUseCase.entrada(
+                request.produtoId(),
+                request.quantidade(),
+                request.motivo()
+        );
+    }
+
+    @PostMapping("/saida")
+    public PipelineResponse saida(@Valid @RequestBody MovimentacaoEstoqueRequest request) {
+        return processoUseCase.saida(
+                request.produtoId(),
+                request.quantidade(),
+                request.motivo()
+        );
+    }
+}

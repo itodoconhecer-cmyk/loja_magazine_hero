@@ -1,40 +1,74 @@
 package aulas.umc.oo.strategy.processo;
 
-import aulas.umc.oo.model.*;
-import aulas.umc.oo.pipeline.*;
-import aulas.umc.oo.repository.*;
+import aulas.umc.oo.model.ItemPedido;
+import aulas.umc.oo.model.MovimentacaoEstoque;
+import aulas.umc.oo.model.Pedido;
+import aulas.umc.oo.model.TipoMovimentacao;
+import aulas.umc.oo.pipeline.ProcessContext;
+import aulas.umc.oo.pipeline.Processo;
+import aulas.umc.oo.repository.MovimentacaoEstoqueRepository;
 import aulas.umc.oo.strategy.ProcessStrategy;
 import org.springframework.stereotype.Component;
+
+import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class ReservarEstoquePedidoStrategy implements ProcessStrategy {
-    private final ProdutoRepository produtoRepo;
-    private final MovimentacaoEstoqueRepository movRepo;
 
-    public ReservarEstoquePedidoStrategy(ProdutoRepository p, MovimentacaoEstoqueRepository m) {
-        produtoRepo = p;
-        movRepo = m;
+    private final MovimentacaoEstoqueRepository movimentacaoRepository;
+
+    public ReservarEstoquePedidoStrategy(
+            MovimentacaoEstoqueRepository movimentacaoRepository
+    ) {
+        this.movimentacaoRepository = movimentacaoRepository;
     }
 
-    public Processo processo() { return Processo.APROVAR_PEDIDO; }
-    public int ordem() { return 20; }
-    public String nome() { return "reservar-estoque-atomico"; }
+    @Override
+    public Processo processo() {
+        return Processo.APROVAR_PEDIDO;
+    }
 
+    @Override
+    public int ordem() {
+        return 20;
+    }
+
+    @Override
+    public String nome() {
+        return "registrar-saida-estoque-pedido";
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public void executar(ProcessContext c) {
-        Pedido pedido = c.get("pedido", Pedido.class);
-        List<ItemPedido> itens = (List<ItemPedido>) c.get("itensPedido", List.class);
+    public void executar(ProcessContext context) {
+        Pedido pedido = context.get("pedido", Pedido.class);
+        List<ItemPedido> itens = (List<ItemPedido>) context.get("itensPedido", List.class);
 
-        for (ItemPedido item : itens) {
-            produtoRepo.retirarEstoqueSeDisponivel(item.produtoId, item.quantidade);
+        // Ordem deterministica de locks reduz risco de deadlock entre pedidos
+        // concorrentes contendo os mesmos produtos em ordens diferentes.
+        List<ItemPedido> itensOrdenados = itens.stream()
+                .sorted(Comparator.comparing(item -> item.produtoId.toString()))
+                .toList();
 
-            MovimentacaoEstoque movimento = new MovimentacaoEstoque();
-            movimento.produtoId = item.produtoId;
-            movimento.tipo = TipoMovimentacao.SAIDA;
-            movimento.quantidade = item.quantidade;
-            movimento.motivo = "RESERVA_PEDIDO:" + pedido.id;
-            movRepo.insert(movimento);
+        for (ItemPedido item : itensOrdenados) {
+            movimentacaoRepository.bloquearProduto(item.produtoId);
+
+            long saldo = movimentacaoRepository.calcularSaldo(item.produtoId);
+            if (saldo < item.quantidade) {
+                throw new IllegalStateException(
+                        "Estoque insuficiente para o produto " + item.produtoId
+                                + ". Saldo atual: " + saldo
+                );
+            }
+
+            MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
+            movimentacao.produtoId = item.produtoId;
+            movimentacao.tipo = TipoMovimentacao.SAIDA;
+            movimentacao.quantidade = item.quantidade;
+            movimentacao.motivo = "VENDA_PEDIDO:" + pedido.id;
+
+            movimentacaoRepository.insert(movimentacao);
         }
     }
 }

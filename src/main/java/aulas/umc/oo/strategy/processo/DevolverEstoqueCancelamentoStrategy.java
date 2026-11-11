@@ -1,9 +1,70 @@
 package aulas.umc.oo.strategy.processo;
-import aulas.umc.oo.pipeline.*; import aulas.umc.oo.strategy.ProcessStrategy; import aulas.umc.oo.repository.*; import aulas.umc.oo.model.*; import org.springframework.stereotype.Component;
+
+import aulas.umc.oo.model.MovimentacaoEstoque;
+import aulas.umc.oo.model.Pedido;
+import aulas.umc.oo.model.StatusPedido;
+import aulas.umc.oo.model.TipoMovimentacao;
+import aulas.umc.oo.pipeline.ProcessContext;
+import aulas.umc.oo.pipeline.Processo;
+import aulas.umc.oo.repository.MovimentacaoEstoqueRepository;
+import aulas.umc.oo.repository.PedidoRepository;
+import aulas.umc.oo.repository.ProdutoRepository;
+import aulas.umc.oo.strategy.ProcessStrategy;
+import org.springframework.stereotype.Component;
+
 @Component
 public class DevolverEstoqueCancelamentoStrategy implements ProcessStrategy {
- private final PedidoRepository pedidoRepo; private final ProdutoRepository produtoRepo; private final MovimentacaoEstoqueRepository movRepo;
- public DevolverEstoqueCancelamentoStrategy(PedidoRepository p,ProdutoRepository pr,MovimentacaoEstoqueRepository m){pedidoRepo=p;produtoRepo=pr;movRepo=m;}
- public Processo processo(){return Processo.CANCELAR_PEDIDO;} public int ordem(){return 20;} public String nome(){return "devolver-estoque";}
- public void executar(ProcessContext c){Pedido p=c.get("pedido",Pedido.class);if(p.status==StatusPedido.AGUARDANDO_PAGAMENTO){for(var i:pedidoRepo.findItems(p.id)){produtoRepo.findByIdIncludingInactive(i.produtoId).orElseThrow(()->new IllegalArgumentException("Produto do pedido nao encontrado"));produtoRepo.adicionarEstoque(i.produtoId,i.quantidade,false);MovimentacaoEstoque m=new MovimentacaoEstoque();m.produtoId=i.produtoId;m.tipo=TipoMovimentacao.ENTRADA;m.quantidade=i.quantidade;m.motivo="CANCELAMENTO_PEDIDO:"+p.id;movRepo.insert(m);}}}
+
+    private final PedidoRepository pedidoRepository;
+    private final ProdutoRepository produtoRepository;
+    private final MovimentacaoEstoqueRepository movimentacaoRepository;
+
+    public DevolverEstoqueCancelamentoStrategy(
+            PedidoRepository pedidoRepository,
+            ProdutoRepository produtoRepository,
+            MovimentacaoEstoqueRepository movimentacaoRepository
+    ) {
+        this.pedidoRepository = pedidoRepository;
+        this.produtoRepository = produtoRepository;
+        this.movimentacaoRepository = movimentacaoRepository;
+    }
+
+    @Override
+    public Processo processo() {
+        return Processo.CANCELAR_PEDIDO;
+    }
+
+    @Override
+    public int ordem() {
+        return 20;
+    }
+
+    @Override
+    public String nome() {
+        return "registrar-entrada-cancelamento";
+    }
+
+    @Override
+    public void executar(ProcessContext context) {
+        Pedido pedido = context.get("pedido", Pedido.class);
+
+        if (pedido.status != StatusPedido.AGUARDANDO_PAGAMENTO) {
+            return;
+        }
+
+        for (var item : pedidoRepository.findItems(pedido.id)) {
+            produtoRepository.findByIdIncludingInactive(item.produtoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Produto do pedido nao encontrado"));
+
+            movimentacaoRepository.bloquearProduto(item.produtoId);
+
+            MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
+            movimentacao.produtoId = item.produtoId;
+            movimentacao.tipo = TipoMovimentacao.ENTRADA;
+            movimentacao.quantidade = item.quantidade;
+            movimentacao.motivo = "CANCELAMENTO_PEDIDO:" + pedido.id;
+
+            movimentacaoRepository.insert(movimentacao);
+        }
+    }
 }

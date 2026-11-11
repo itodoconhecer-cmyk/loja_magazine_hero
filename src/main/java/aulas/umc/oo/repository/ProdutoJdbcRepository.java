@@ -3,47 +3,87 @@ package aulas.umc.oo.repository;
 import aulas.umc.oo.model.Produto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.util.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class ProdutoJdbcRepository implements ProdutoRepository {
+
     private final JdbcTemplate jdbc;
-    public ProdutoJdbcRepository(JdbcTemplate jdbc){this.jdbc=jdbc;}
 
-    public Produto insert(Produto p){
-        jdbc.update("insert into produto(id,nome,preco,estoque,ativo) values(?,?,?,?,?)",p.id,p.nome,p.preco,p.estoque,p.ativo);
-        return p;
+    public ProdutoJdbcRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
     }
-    public List<Produto> findAll(){return jdbc.query("select * from produto where ativo=true order by nome",(rs,n)->map(rs));}
-    public Optional<Produto> findById(UUID id){return jdbc.query("select * from produto where id=? and ativo=true",(rs,n)->map(rs),id).stream().findFirst();}
-    public Optional<Produto> findByIdIncludingInactive(UUID id){return jdbc.query("select * from produto where id=?",(rs,n)->map(rs),id).stream().findFirst();}
 
-    // Estoque nao e alterado pelo CRUD. Movimentacoes usam metodos especificos abaixo.
-    public Produto update(Produto p){
-        int n=jdbc.update("update produto set nome=?,preco=? where id=? and ativo=true",p.nome,p.preco,p.id);
-        if(n==0)throw new RepositoryException("Produto nao encontrado");
-        return p;
+    @Override
+    public Produto insert(Produto produto) {
+        jdbc.update(
+                "insert into produto(id, nome, preco, ativo) values(?, ?, ?, ?)",
+                produto.id,
+                produto.nome,
+                produto.preco,
+                produto.ativo
+        );
+        return produto;
     }
-    public void deleteLogical(UUID id){jdbc.update("update produto set ativo=false where id=?",id);}
-    public void atualizarEstoque(UUID id,int novo){
-        if(novo < 0) throw new IllegalArgumentException("Estoque nao pode ser negativo");
-        int n=jdbc.update("update produto set estoque=? where id=? and ativo=true",novo,id);
-        if(n==0)throw new RepositoryException("Produto nao encontrado");
+
+    @Override
+    public List<Produto> findAll() {
+        return jdbc.query(
+                "select id, nome, preco, ativo from produto where ativo = true order by nome",
+                (rs, rowNum) -> map(rs)
+        );
     }
-    public void adicionarEstoque(UUID id,int quantidade,boolean exigirAtivo){
-        if(quantidade <= 0) throw new IllegalArgumentException("Quantidade deve ser positiva");
-        String sql=exigirAtivo
-            ? "update produto set estoque=estoque+? where id=? and ativo=true"
-            : "update produto set estoque=estoque+? where id=?";
-        int n=jdbc.update(sql,quantidade,id);
-        if(n==0)throw new RepositoryException("Produto nao encontrado para entrada/devolucao");
+
+    @Override
+    public Optional<Produto> findById(UUID id) {
+        return jdbc.query(
+                "select id, nome, preco, ativo from produto where id = ? and ativo = true",
+                (rs, rowNum) -> map(rs),
+                id
+        ).stream().findFirst();
     }
-    public void retirarEstoqueSeDisponivel(UUID id,int quantidade){
-        if(quantidade <= 0) throw new IllegalArgumentException("Quantidade deve ser positiva");
-        int n=jdbc.update("update produto set estoque=estoque-? where id=? and ativo=true and estoque>=?",quantidade,id,quantidade);
-        if(n==0)throw new IllegalStateException("Estoque insuficiente ou produto inativo");
+
+    @Override
+    public Optional<Produto> findByIdIncludingInactive(UUID id) {
+        return jdbc.query(
+                "select id, nome, preco, ativo from produto where id = ?",
+                (rs, rowNum) -> map(rs),
+                id
+        ).stream().findFirst();
     }
-    private Produto map(java.sql.ResultSet rs)throws java.sql.SQLException{
-        Produto p=new Produto();p.id=rs.getObject("id",UUID.class);p.nome=rs.getString("nome");p.preco=rs.getBigDecimal("preco");p.estoque=rs.getInt("estoque");p.ativo=rs.getBoolean("ativo");return p;
+
+    @Override
+    public Produto update(Produto produto) {
+        int linhas = jdbc.update(
+                "update produto set nome = ?, preco = ? where id = ? and ativo = true",
+                produto.nome,
+                produto.preco,
+                produto.id
+        );
+
+        if (linhas == 0) {
+            throw new RepositoryException("Produto nao encontrado");
+        }
+
+        return produto;
+    }
+
+    @Override
+    public void deleteLogical(UUID id) {
+        jdbc.update("update produto set ativo = false where id = ?", id);
+    }
+
+    private Produto map(ResultSet rs) throws SQLException {
+        Produto produto = new Produto();
+        produto.id = rs.getObject("id", UUID.class);
+        produto.nome = rs.getString("nome");
+        produto.preco = rs.getBigDecimal("preco");
+        produto.ativo = rs.getBoolean("ativo");
+        return produto;
     }
 }
