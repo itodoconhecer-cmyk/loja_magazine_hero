@@ -1,18 +1,18 @@
-# Validação de entrada/saída, segurança e logs
+# Segurança, validação, exceções e observabilidade
 
-## Ordem do fluxo
+## Fluxo de entrada e saída
 
 ```text
 HTTP Request
    |
    v
-1. Autorização JWT
+1. Autenticação JWT (Resource Server)
    |
    v
-2. Permissão do endpoint
+2. Autorização por permissão (@PreAuthorize)
    |
    v
-3. Bean Validation do Request
+3. Validação sintática/estrutural do Request
    |
    v
 4. Validação inicial do fluxo
@@ -21,97 +21,97 @@ HTTP Request
 5. UseCase / Pipeline + Strategy
    |
    v
-6. Validação do Response
+6. Validação do contrato de Response
    |
    v
 HTTP Response
 ```
 
-## 1. Autorização
+## Autenticação JWT
 
-Todos os endpoints exigem JWT Bearer válido.
+A API funciona como OAuth2 Resource Server.
 
-A aplicação usa Spring Security Resource Server com HS256 para fins didáticos. O segredo deve ser fornecido por `APP_JWT_SECRET` fora do ambiente local.
+Em produção devem ser configurados:
 
-## 2. Permissão
+```properties
+APP_JWT_ISSUER_URI=https://idp.exemplo.com
+APP_JWT_JWK_SET_URI=https://idp.exemplo.com/.well-known/jwks.json
+APP_JWT_AUDIENCE=loja-magazine-hero
+```
 
-Cada endpoint declara a permissão necessária com `@PreAuthorize`.
+Não existe segredo JWT padrão embutido na aplicação.
 
-Exemplos:
+## Permissões
 
-- `PRODUTO_LER`
-- `PRODUTO_ESCREVER`
-- `PEDIDO_APROVAR`
-- `PAGAMENTO_ESTORNAR`
-- `ESTOQUE_MOVIMENTAR`
+As permissões são lidas do claim `permissions` do JWT e validadas com
+`@PreAuthorize`.
 
-O JWT deve possuir o claim:
+Exemplo:
 
 ```json
 {
   "permissions": [
     "PRODUTO_LER",
-    "PEDIDO_LER"
+    "PEDIDO_LER",
+    "PEDIDO_APROVAR"
   ]
 }
 ```
 
-## 3. Validação dos campos
+## Validação de Request
 
-Requests usam Jakarta Bean Validation com mensagens explícitas:
+Os DTOs usam Jakarta Bean Validation.
 
-- `@NotNull`
-- `@NotBlank`
-- `@Size`
-- `@Email`
-- `@Positive`
-- `@PositiveOrZero`
-- `@Digits`
+Além disso, o handler trata:
 
-## 4. Validação inicial do fluxo
+- JSON malformado ou enum invalido;
+- parametro de URL com tipo invalido;
+- parametro obrigatorio ausente;
+- violacoes de Bean Validation.
 
-Antes da primeira Strategy, `FlowInitialValidator` valida:
+## Validação inicial do Pipeline
 
-- processo informado;
-- contexto presente;
-- chaves obrigatórias;
-- tipos esperados;
-- quantidade positiva;
-- motivo obrigatório.
+`FlowInitialValidator` executa antes da primeira Strategy e verifica a estrutura
+minima do contexto.
 
-Isso evita iniciar transação de negócio com contexto estruturalmente inválido.
+A validacao de contexto nao substitui regras de dominio. Regras como estado do
+pedido, saldo ou possibilidade de estorno continuam nas Strategies.
 
-## 5. Exceções personalizadas
+## Exceções de caso de uso
 
-Existe uma hierarquia por caso de uso:
+As excecoes carregam:
 
-- `ClienteUseCaseException`
-- `ProdutoUseCaseException`
-- `CarrinhoUseCaseException`
-- `PedidoUseCaseException`
-- `PagamentoUseCaseException`
-- `EstoqueUseCaseException`
-- `ProcessoUseCaseException`
+- caso de uso;
+- categoria;
+- codigo estavel;
+- mensagem.
 
-A resposta de erro usa contrato padronizado com:
+Categorias:
 
-- timestamp;
-- HTTP status;
-- código;
-- mensagem;
-- path;
-- correlationId;
-- campos inválidos.
+- `NOT_FOUND` -> HTTP 404;
+- `CONFLICT` -> HTTP 409;
+- `BUSINESS_RULE` -> HTTP 422.
 
-## 6. Validação de Response
+A camada de aplicacao nao depende de `HttpStatus`; a traducao HTTP e feita pelo
+`ApiExceptionHandler`.
 
-`ResponseValidationAdvice` valida DTOs de saída com Bean Validation antes da serialização.
+## Validação de Response
 
-Se a aplicação produzir um response inválido, o cliente recebe HTTP 500 com código `RESP-001`, pois se trata de falha interna do contrato.
+Os DTOs de response possuem constraints e sao validados antes da serializacao.
 
-## 7. Logs por período
+A validacao esta restrita aos controllers da API para nao interferir com
+respostas internas do Spring Security.
 
-O Logback grava arquivos separados:
+## PipelineResponse
+
+O contexto interno do Pipeline nao e devolvido integralmente ao cliente.
+
+`publicSnapshot()` expoe apenas valores simples e seguros. Objetos de dominio
+internos ficam restritos ao processamento.
+
+## Logs e correlation id
+
+Arquivos separados:
 
 ```text
 logs/
@@ -120,17 +120,11 @@ logs/
   errors/
 ```
 
-Por padrão, a rotação é diária:
+A rotacao e diaria por padrao e configuravel.
 
-```properties
-app.logging.period-pattern=yyyy-MM-dd
-```
+`X-Correlation-Id` e propagado quando valido. Valores fora do formato aceito
+sao substituidos por UUID gerado pela aplicacao, evitando injecao de conteudo
+nos logs.
 
-Configurações:
-
-- `APP_LOG_DIR`
-- `APP_LOG_PERIOD_PATTERN`
-- `APP_LOG_MAX_HISTORY`
-- `APP_LOG_MAX_FILE_SIZE`
-
-Cada requisição recebe `X-Correlation-Id`, criado automaticamente quando o cliente não envia um.
+Nunca devem ser gravados token JWT, senha, Authorization header ou dados
+sensíveis no log operacional.

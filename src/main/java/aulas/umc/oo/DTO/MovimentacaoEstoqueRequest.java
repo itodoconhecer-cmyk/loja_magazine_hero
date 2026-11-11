@@ -8,10 +8,7 @@ import java.util.UUID;
 
 public record MovimentacaoEstoqueRequest(
         @NotNull(message = "produtoId e obrigatorio") UUID produtoId,
-
-        @Positive(message = "quantidade deve ser maior que zero")
-        int quantidade,
-
+        @Positive(message = "quantidade deve ser maior que zero") int quantidade,
         @NotBlank(message = "motivo e obrigatorio")
         @Size(max = 255, message = "motivo deve ter no maximo 255 caracteres")
         String motivo) {}

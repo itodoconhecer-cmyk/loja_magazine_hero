@@ -5,4 +5,5 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.util.UUID;
 
 public record SaldoEstoqueResponse(
-        @NotNull UUID produtoId, @PositiveOrZero long saldo) {}
+        @NotNull UUID produtoId,
+        @PositiveOrZero long saldo) {}

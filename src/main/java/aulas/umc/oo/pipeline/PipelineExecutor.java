@@ -31,8 +31,7 @@ public class PipelineExecutor {
         Map<String, List<String>> conflitos = new LinkedHashMap<>();
         for (var strategy : strategies) {
             String chave = strategy.processo() + ":" + strategy.ordem();
-            conflitos
-                    .computeIfAbsent(chave, ignored -> new ArrayList<>())
+            conflitos.computeIfAbsent(chave, ignored -> new ArrayList<>())
                     .add(strategy.getClass().getSimpleName());
         }
 
@@ -63,13 +62,19 @@ public class PipelineExecutor {
 
         for (var strategy : tarefas) {
             OPERATIONS_LOG.info(
-                    "strategy_started process={} order={} strategy={}", processo, strategy.ordem(), strategy.nome());
+                    "strategy_started process={} order={} strategy={}",
+                    processo,
+                    strategy.ordem(),
+                    strategy.nome());
 
             strategy.executar(context);
             context.registrar(strategy.nome());
 
             OPERATIONS_LOG.info(
-                    "strategy_finished process={} order={} strategy={}", processo, strategy.ordem(), strategy.nome());
+                    "strategy_finished process={} order={} strategy={}",
+                    processo,
+                    strategy.ordem(),
+                    strategy.nome());
         }
 
         OPERATIONS_LOG.info("process_finished process={}", processo);

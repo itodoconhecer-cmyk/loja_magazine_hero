@@ -21,8 +21,10 @@ public class FlowInitialValidator {
         switch (processo) {
             case CALCULAR_FRETE, APROVAR_PEDIDO, CANCELAR_PEDIDO, EXCLUIR_PEDIDO ->
                 require(context, "pedidoId", UUID.class);
-            case APROVACAO_PAGAMENTO, ESTORNAR_PAGAMENTO -> require(context, "pagamentoId", UUID.class);
-            case ESVAZIAR_CARRINHO -> require(context, "carrinhoId", UUID.class);
+            case APROVACAO_PAGAMENTO, ESTORNAR_PAGAMENTO ->
+                require(context, "pagamentoId", UUID.class);
+            case ESVAZIAR_CARRINHO ->
+                require(context, "carrinhoId", UUID.class);
             case EDITAR_PEDIDO -> {
                 require(context, "pedidoId", UUID.class);
                 require(context, "tipoFrete", TipoFrete.class);

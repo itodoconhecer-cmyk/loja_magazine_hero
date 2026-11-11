@@ -28,11 +28,8 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exception)
             throws IOException {
-        SECURITY_LOG.warn(
-                "permission_denied method={} uri={} reason={}",
-                request.getMethod(),
-                request.getRequestURI(),
-                exception.getMessage());
+        SECURITY_LOG.warn("permission_denied method={} uri={} reason={}",
+                request.getMethod(), request.getRequestURI(), exception.getMessage());
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

@@ -18,6 +18,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @ControllerAdvice
 public class ResponseValidationAdvice implements ResponseBodyAdvice<Object> {
 
+    private static final String API_CONTROLLER_PACKAGE = "aulas.umc.oo.controller";
+
     private final Validator validator;
 
     public ResponseValidationAdvice(Validator validator) {
@@ -25,8 +27,12 @@ public class ResponseValidationAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+    public boolean supports(
+            MethodParameter returnType,
+            Class<? extends HttpMessageConverter<?>> converterType) {
+        Package controllerPackage = returnType.getContainingClass().getPackage();
+        return controllerPackage != null
+                && API_CONTROLLER_PACKAGE.equals(controllerPackage.getName());
     }
 
     @Override
@@ -43,21 +49,23 @@ public class ResponseValidationAdvice implements ResponseBodyAdvice<Object> {
         }
 
         List<String> violacoes = new ArrayList<>();
+
         if (body instanceof Collection<?> collection) {
             for (Object item : collection) {
-                validar(item, violacoes);
+                validate(item, violacoes);
             }
         } else {
-            validar(body, violacoes);
+            validate(body, violacoes);
         }
 
         if (!violacoes.isEmpty()) {
             throw new ResponseValidationException(violacoes);
         }
+
         return body;
     }
 
-    private void validar(Object body, List<String> violacoes) {
+    private void validate(Object body, List<String> violacoes) {
         if (body == null) {
             violacoes.add("Resposta contem item nulo");
             return;
