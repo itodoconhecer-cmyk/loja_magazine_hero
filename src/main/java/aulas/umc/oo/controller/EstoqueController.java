@@ -26,8 +26,7 @@ public class EstoqueController {
 
     @GetMapping("/movimentacoes")
     @PreAuthorize("hasAuthority('ESTOQUE_LER')")
-    public List<MovimentacaoEstoqueResponse> listarMovimentacoes(
-            @RequestParam(required = false) UUID produtoId) {
+    public List<MovimentacaoEstoqueResponse> listarMovimentacoes(@RequestParam(required = false) UUID produtoId) {
         return consultaUseCase.listarMovimentacoes(produtoId);
     }
 

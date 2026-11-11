@@ -21,8 +21,7 @@ class FlowInitialValidatorTest {
                 .put("quantidade", 1)
                 .put("motivo", "AJUSTE");
 
-        assertDoesNotThrow(() ->
-                validator.validar(Processo.MOVIMENTACAO_ESTOQUE_SAIDA, context));
+        assertDoesNotThrow(() -> validator.validar(Processo.MOVIMENTACAO_ESTOQUE_SAIDA, context));
     }
 
     @Test

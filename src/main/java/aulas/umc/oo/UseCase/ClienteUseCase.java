@@ -31,19 +31,17 @@ public class ClienteUseCase {
     }
 
     public ClienteResponse buscar(UUID id) {
-        return mapper.toResponse(repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "CLI-404",
-                        "Cliente nao encontrado")));
+        return mapper.toResponse(repository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ClienteUseCaseException(ErrorCategory.NOT_FOUND, "CLI-404", "Cliente nao encontrado")));
     }
 
     public ClienteResponse atualizar(UUID id, ClienteRequest request) {
-        repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "CLI-404",
-                        "Cliente nao encontrado"));
+        repository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ClienteUseCaseException(ErrorCategory.NOT_FOUND, "CLI-404", "Cliente nao encontrado"));
 
         Cliente cliente = mapper.toDomain(request);
         cliente.id = id;
@@ -52,11 +50,10 @@ public class ClienteUseCase {
     }
 
     public void excluir(UUID id) {
-        repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "CLI-404",
-                        "Cliente nao encontrado"));
+        repository
+                .findById(id)
+                .orElseThrow(() ->
+                        new ClienteUseCaseException(ErrorCategory.NOT_FOUND, "CLI-404", "Cliente nao encontrado"));
 
         repository.deleteLogical(id);
     }

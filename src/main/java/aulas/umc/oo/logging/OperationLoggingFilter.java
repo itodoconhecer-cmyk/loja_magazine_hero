@@ -21,14 +21,10 @@ public class OperationLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger OPERATIONS_LOG = LoggerFactory.getLogger("OPERATIONS");
     private static final String CORRELATION_HEADER = "X-Correlation-Id";
-    private static final Pattern SAFE_CORRELATION_ID =
-            Pattern.compile("[A-Za-z0-9._:-]{1,100}");
+    private static final Pattern SAFE_CORRELATION_ID = Pattern.compile("[A-Za-z0-9._:-]{1,100}");
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String correlationId = normalizeCorrelationId(request.getHeader(CORRELATION_HEADER));
@@ -37,10 +33,7 @@ public class OperationLoggingFilter extends OncePerRequestFilter {
         MDC.put("correlationId", correlationId);
         response.setHeader(CORRELATION_HEADER, correlationId);
 
-        OPERATIONS_LOG.info(
-                "request_started method={} uri={}",
-                request.getMethod(),
-                request.getRequestURI());
+        OPERATIONS_LOG.info("request_started method={} uri={}", request.getMethod(), request.getRequestURI());
 
         try {
             filterChain.doFilter(request, response);
@@ -57,7 +50,9 @@ public class OperationLoggingFilter extends OncePerRequestFilter {
     }
 
     private String normalizeCorrelationId(String value) {
-        if (value == null || value.isBlank() || !SAFE_CORRELATION_ID.matcher(value).matches()) {
+        if (value == null
+                || value.isBlank()
+                || !SAFE_CORRELATION_ID.matcher(value).matches()) {
             return UUID.randomUUID().toString();
         }
         return value;

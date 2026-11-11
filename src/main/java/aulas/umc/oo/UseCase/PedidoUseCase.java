@@ -34,30 +34,23 @@ public class PedidoUseCase {
     }
 
     public PedidoResponse criar(PedidoRequest request) {
-        clienteRepository.findById(request.clienteId())
+        clienteRepository
+                .findById(request.clienteId())
                 .orElseThrow(() -> new PedidoUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "PED-001",
-                        "Cliente do pedido nao encontrado"));
+                        ErrorCategory.NOT_FOUND, "PED-001", "Cliente do pedido nao encontrado"));
 
-        Carrinho carrinho = carrinhoRepository.findById(request.carrinhoId())
+        Carrinho carrinho = carrinhoRepository
+                .findById(request.carrinhoId())
                 .orElseThrow(() -> new PedidoUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "PED-002",
-                        "Carrinho do pedido nao encontrado"));
+                        ErrorCategory.NOT_FOUND, "PED-002", "Carrinho do pedido nao encontrado"));
 
         if (!carrinho.clienteId.equals(request.clienteId())) {
             throw new PedidoUseCaseException(
-                    ErrorCategory.BUSINESS_RULE,
-                    "PED-003",
-                    "Carrinho pertence a outro cliente");
+                    ErrorCategory.BUSINESS_RULE, "PED-003", "Carrinho pertence a outro cliente");
         }
 
         if (repository.findByCarrinhoId(request.carrinhoId()).isPresent()) {
-            throw new PedidoUseCaseException(
-                    ErrorCategory.CONFLICT,
-                    "PED-004",
-                    "Carrinho ja possui pedido ativo");
+            throw new PedidoUseCaseException(ErrorCategory.CONFLICT, "PED-004", "Carrinho ja possui pedido ativo");
         }
 
         Pedido pedido = new Pedido();
@@ -73,17 +66,14 @@ public class PedidoUseCase {
     }
 
     public PedidoResponse buscar(UUID id) {
-        return mapper.toResponse(repository.findById(id)
-                .orElseThrow(() -> new PedidoUseCaseException(
-                        ErrorCategory.NOT_FOUND,
-                        "PED-404",
-                        "Pedido nao encontrado")));
+        return mapper.toResponse(repository
+                .findById(id)
+                .orElseThrow(
+                        () -> new PedidoUseCaseException(ErrorCategory.NOT_FOUND, "PED-404", "Pedido nao encontrado")));
     }
 
     public void excluirCrud(UUID id) {
         throw new PedidoUseCaseException(
-                ErrorCategory.BUSINESS_RULE,
-                "PED-005",
-                "Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
+                ErrorCategory.BUSINESS_RULE, "PED-005", "Exclusao de pedido deve usar o processo EXCLUIR_PEDIDO");
     }
 }

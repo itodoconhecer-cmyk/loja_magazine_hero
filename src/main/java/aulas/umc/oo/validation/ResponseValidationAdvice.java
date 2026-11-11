@@ -27,12 +27,9 @@ public class ResponseValidationAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public boolean supports(
-            MethodParameter returnType,
-            Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         Package controllerPackage = returnType.getContainingClass().getPackage();
-        return controllerPackage != null
-                && API_CONTROLLER_PACKAGE.equals(controllerPackage.getName());
+        return controllerPackage != null && API_CONTROLLER_PACKAGE.equals(controllerPackage.getName());
     }
 
     @Override

@@ -28,8 +28,11 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException {
-        SECURITY_LOG.warn("authorization_failed method={} uri={} reason={}",
-                request.getMethod(), request.getRequestURI(), exception.getMessage());
+        SECURITY_LOG.warn(
+                "authorization_failed method={} uri={} reason={}",
+                request.getMethod(),
+                request.getRequestURI(),
+                exception.getMessage());
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

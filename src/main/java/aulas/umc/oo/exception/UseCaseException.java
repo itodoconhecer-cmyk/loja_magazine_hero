@@ -6,11 +6,7 @@ public abstract class UseCaseException extends RuntimeException {
     private final String codigo;
     private final ErrorCategory categoria;
 
-    protected UseCaseException(
-            String useCase,
-            ErrorCategory categoria,
-            String codigo,
-            String mensagem) {
+    protected UseCaseException(String useCase, ErrorCategory categoria, String codigo, String mensagem) {
         super(mensagem);
         this.useCase = useCase;
         this.categoria = categoria;
