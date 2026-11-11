@@ -3,6 +3,7 @@ package aulas.umc.oo.UseCase;
 import aulas.umc.oo.DTO.ClienteRequest;
 import aulas.umc.oo.DTO.ClienteResponse;
 import aulas.umc.oo.exception.ClienteUseCaseException;
+import aulas.umc.oo.exception.ErrorCategory;
 import aulas.umc.oo.mapper.ClienteMapper;
 import aulas.umc.oo.model.Cliente;
 import aulas.umc.oo.repository.ClienteRepository;
@@ -31,21 +32,32 @@ public class ClienteUseCase {
 
     public ClienteResponse buscar(UUID id) {
         return mapper.toResponse(repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado")));
+                .orElseThrow(() -> new ClienteUseCaseException(
+                        ErrorCategory.NOT_FOUND,
+                        "CLI-404",
+                        "Cliente nao encontrado")));
     }
 
     public ClienteResponse atualizar(UUID id, ClienteRequest request) {
         repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado"));
+                .orElseThrow(() -> new ClienteUseCaseException(
+                        ErrorCategory.NOT_FOUND,
+                        "CLI-404",
+                        "Cliente nao encontrado"));
 
         Cliente cliente = mapper.toDomain(request);
         cliente.id = id;
+
         return mapper.toResponse(repository.update(cliente));
     }
 
     public void excluir(UUID id) {
         repository.findById(id)
-                .orElseThrow(() -> new ClienteUseCaseException("CLI-404", "Cliente nao encontrado"));
+                .orElseThrow(() -> new ClienteUseCaseException(
+                        ErrorCategory.NOT_FOUND,
+                        "CLI-404",
+                        "Cliente nao encontrado"));
+
         repository.deleteLogical(id);
     }
 }

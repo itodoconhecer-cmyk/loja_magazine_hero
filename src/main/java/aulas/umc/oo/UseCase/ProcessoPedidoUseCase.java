@@ -1,7 +1,6 @@
 package aulas.umc.oo.UseCase;
 
 import aulas.umc.oo.DTO.PipelineResponse;
-import aulas.umc.oo.exception.ProcessoUseCaseException;
 import aulas.umc.oo.model.TipoFrete;
 import aulas.umc.oo.pipeline.PipelineExecutor;
 import aulas.umc.oo.pipeline.ProcessContext;
@@ -19,19 +18,12 @@ public class ProcessoPedidoUseCase {
     }
 
     private PipelineResponse executar(Processo processo, ProcessContext context) {
-        try {
-            ProcessContext resultado = pipeline.executar(processo, context);
-            return new PipelineResponse(
-                    processo.name(),
-                    resultado.tarefasExecutadas(),
-                    resultado.snapshot());
-        } catch (ProcessoUseCaseException exception) {
-            throw exception;
-        } catch (RuntimeException exception) {
-            throw new ProcessoUseCaseException(
-                    "PRC-" + processo.name(),
-                    "Falha no processo " + processo.name() + ": " + exception.getMessage());
-        }
+        ProcessContext resultado = pipeline.executar(processo, context);
+
+        return new PipelineResponse(
+                processo.name(),
+                resultado.tarefasExecutadas(),
+                resultado.publicSnapshot());
     }
 
     public PipelineResponse calcularFrete(UUID id) {

@@ -1,7 +1,8 @@
 package aulas.umc.oo.exception;
 
 public class ProdutoUseCaseException extends UseCaseException {
-    public ProdutoUseCaseException(String codigo, String mensagem) {
-        super("PRODUTO", codigo, mensagem);
+
+    public ProdutoUseCaseException(ErrorCategory categoria, String codigo, String mensagem) {
+        super("PRODUTO", categoria, codigo, mensagem);
     }
 }

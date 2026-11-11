@@ -2,6 +2,7 @@ package aulas.umc.oo.UseCase;
 
 import aulas.umc.oo.DTO.MovimentacaoEstoqueResponse;
 import aulas.umc.oo.DTO.SaldoEstoqueResponse;
+import aulas.umc.oo.exception.ErrorCategory;
 import aulas.umc.oo.exception.EstoqueUseCaseException;
 import aulas.umc.oo.model.MovimentacaoEstoque;
 import aulas.umc.oo.repository.MovimentacaoEstoqueRepository;
@@ -25,7 +26,9 @@ public class EstoqueConsultaUseCase {
 
     public SaldoEstoqueResponse consultarSaldo(UUID produtoId) {
         validarProduto(produtoId);
-        return new SaldoEstoqueResponse(produtoId, movimentacaoRepository.calcularSaldo(produtoId));
+        return new SaldoEstoqueResponse(
+                produtoId,
+                movimentacaoRepository.calcularSaldo(produtoId));
     }
 
     public List<MovimentacaoEstoqueResponse> listarMovimentacoes(UUID produtoId) {
@@ -36,6 +39,7 @@ public class EstoqueConsultaUseCase {
         }
 
         validarProduto(produtoId);
+
         return movimentacaoRepository.findByProdutoId(produtoId).stream()
                 .map(this::toResponse)
                 .toList();
@@ -43,7 +47,10 @@ public class EstoqueConsultaUseCase {
 
     private void validarProduto(UUID produtoId) {
         produtoRepository.findByIdIncludingInactive(produtoId)
-                .orElseThrow(() -> new EstoqueUseCaseException("EST-404", "Produto nao encontrado"));
+                .orElseThrow(() -> new EstoqueUseCaseException(
+                        ErrorCategory.NOT_FOUND,
+                        "EST-404",
+                        "Produto nao encontrado"));
     }
 
     private MovimentacaoEstoqueResponse toResponse(MovimentacaoEstoque movimentacao) {
