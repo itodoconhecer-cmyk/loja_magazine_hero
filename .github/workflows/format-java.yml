@@ -1,0 +1,46 @@
+name: Format Java
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**/*.java'
+      - 'pom.xml'
+      - '.github/workflows/format-java.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: "!contains(github.event.head_commit.message, '[skip-format]')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Aplicar formatacao profissional
+        run: mvn -B spotless:apply
+
+      - name: Commitar formatacao quando necessario
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Codigo ja esta formatado."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src pom.xml
+          git commit -m "style: formata todo o codigo Java [skip-format]"
+          git push origin HEAD:main
