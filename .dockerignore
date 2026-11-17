@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+.env
+.env.*
+logs
+**/target
+**/node_modules
+*.zip
+*.docx
