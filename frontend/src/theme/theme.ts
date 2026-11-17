@@ -1,0 +1,2 @@
+import {createTheme} from '@mui/material/styles';
+export const theme=createTheme({palette:{primary:{main:'#651fff'},secondary:{main:'#ff3d71'},success:{main:'#008c73'},background:{default:'#f8f7ff',paper:'#fff'}},shape:{borderRadius:16},typography:{fontFamily:'Inter,Roboto,Arial,sans-serif',h4:{fontWeight:850},h5:{fontWeight:800}},components:{MuiButton:{styleOverrides:{root:{textTransform:'none',fontWeight:700,borderRadius:12}}},MuiCard:{styleOverrides:{root:{borderRadius:20,boxShadow:'0 6px 24px rgba(32,20,86,.07)'}}}}});
