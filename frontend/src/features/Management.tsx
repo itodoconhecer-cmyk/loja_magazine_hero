@@ -5,13 +5,14 @@ import {api,moeda} from '../services/api';
 import {SectionTitle} from '../components/atoms/SectionTitle';
 import {StatusMessage} from '../components/molecules/StatusMessage';
 type Section='produtos'|'clientes'|'carrinhos'|'pedidos'|'pagamentos';
+type ManagementRow={id:string;nome?:string;email?:string;preco?:number;total?:number;status?:string;itens?:unknown[]};
 const title:Record<Section,string>={produtos:'Produtos',clientes:'Clientes',carrinhos:'Carrinhos',pedidos:'Pedidos',pagamentos:'Pagamentos'};
 const uuid=(s:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 export function Management({section}:{section:string}){
  const key=section as Section;const [fields,setFields]=useState<Record<string,string>>({});const [notice,setNotice]=useState('');const qc=useQueryClient();const value=(k:string)=>fields[k]||'';const set=(k:string,v:string)=>setFields(p=>({...p,[k]:v}));
- const query=useQuery({queryKey:[section],queryFn:()=>{switch(key){case 'produtos':return api.produtos();case 'clientes':return api.clientes();case 'carrinhos':return api.carrinhos();case 'pedidos':return api.pedidos();case 'pagamentos':return api.pagamentos();default:throw Error('Seção desconhecida');}}});
+ const query=useQuery<ManagementRow[]>({queryKey:[section],queryFn:async ():Promise<ManagementRow[]>=>{switch(key){case 'produtos':return api.produtos();case 'clientes':return api.clientes();case 'carrinhos':return api.carrinhos();case 'pedidos':return api.pedidos();case 'pagamentos':return api.pagamentos();default:throw Error('Seção desconhecida');}}});
  const mutation=useMutation({mutationFn:(fn:()=>Promise<unknown>)=>fn(),onSuccess:()=>{setNotice('Operação executada pela API.');qc.invalidateQueries();},onError:()=>setNotice('')});
- const exec=(fn:()=>Promise<unknown>)=>mutation.mutate(fn);const rows=(query.data||[]) as Array<{id:string;nome?:string;email?:string;preco?:number;total?:number;status?:string;itens?:unknown[]}>;
+ const exec=(fn:()=>Promise<unknown>)=>mutation.mutate(fn);const rows=query.data||[];
  return <><SectionTitle title={'Gestão de '+(title[key]||'registros')} subtitle="Operações reais com autorização verificada no backend"/>
  {notice&&<Alert severity="success" onClose={()=>setNotice('')} sx={{mb:2}}>{notice}</Alert>}
  {mutation.error&&<Box sx={{mb:2}}><StatusMessage error={mutation.error}/></Box>}
