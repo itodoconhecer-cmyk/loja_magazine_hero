@@ -14,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.Customizer;
 
 @Configuration
 @EnableMethodSecurity
@@ -55,7 +54,7 @@ public class SecurityConfig {
             throw new IllegalStateException("Credenciais de teste invalidas; configure o hash BCrypt no Render");
         }
         return new InMemoryUserDetailsManager(User.withUsername(username)
-                .password(passwordHash)
+                .password("{bcrypt}" + passwordHash)
                 .authorities(
                         Permission.PRODUTO_LER, Permission.CLIENTE_LER,
                         Permission.CARRINHO_LER, Permission.PEDIDO_LER,
