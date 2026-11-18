@@ -43,7 +43,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Conta de laboratorio opcional: senha BCrypt mantida exclusivamente no Render.
+    // Conta de teste administradora opcional: todas as permissoes de negocio.\n    // Habilitar apenas no laboratorio; desabilitar removendo MAGAZINE_TEST_USERNAME.\n    // Hash BCrypt mantido exclusivamente no Render.
     // Sem estas variaveis, nao existe usuario de teste habilitado.
     @Bean
     @ConditionalOnProperty(name = "MAGAZINE_TEST_USERNAME")
@@ -56,9 +56,17 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(User.withUsername(username)
                 .password("{bcrypt}" + passwordHash)
                 .authorities(
-                        Permission.PRODUTO_LER, Permission.CLIENTE_LER,
-                        Permission.CARRINHO_LER, Permission.PEDIDO_LER,
-                        Permission.PAGAMENTO_LER, Permission.ESTOQUE_LER)
+                        Permission.CLIENTE_LER, Permission.CLIENTE_ESCREVER,
+                        Permission.PRODUTO_LER, Permission.PRODUTO_ESCREVER,
+                        Permission.CARRINHO_LER, Permission.CARRINHO_ESCREVER,
+                        Permission.CARRINHO_PROCESSAR,
+                        Permission.PEDIDO_LER, Permission.PEDIDO_ESCREVER,
+                        Permission.PEDIDO_CALCULAR_FRETE, Permission.PEDIDO_APROVAR,
+                        Permission.PEDIDO_CANCELAR, Permission.PEDIDO_EXCLUIR,
+                        Permission.PEDIDO_EDITAR,
+                        Permission.PAGAMENTO_LER, Permission.PAGAMENTO_ESCREVER,
+                        Permission.PAGAMENTO_APROVAR, Permission.PAGAMENTO_ESTORNAR,
+                        Permission.ESTOQUE_LER, Permission.ESTOQUE_MOVIMENTAR)
                 .build());
     }
 
