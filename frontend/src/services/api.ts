@@ -5,13 +5,30 @@ export type Carrinho={id:string;clienteId:string;ativo:boolean;itens:ItemCarrinh
 export type Pedido={id:string;clienteId:string;carrinhoId:string;status:string;tipoFrete:'NORMAL'|'EXPRESSO';subtotal:number;valorFrete:number;total:number;ativo:boolean};
 export type Pagamento={id:string;pedidoId:string;valor:number;status:string;meio:string};
 let accessToken='';
-export function setAccessToken(value:string){accessToken=value.trim();}
-export function hasAccessToken(){return !!accessToken;}
+let testUser='';
+let testPassword='';
+export function setAccessToken(value:string){
+  accessToken=value.trim();testUser='';testPassword='';
+}
+export function setTestCredentials(username:string,password:string){
+  testUser=username.trim();testPassword=password;accessToken='';
+}
+export function clearCredentials(){accessToken='';testUser='';testPassword='';}
+export function hasAccessToken(){return !!accessToken||!!(testUser&&testPassword);}
+export function isTestLogin(){return !!(testUser&&testPassword);}
+function basicAuthorization(username:string,password:string){
+  // TextEncoder evita corrupcao de caracteres Unicode antes do Base64.
+  const bytes=new TextEncoder().encode(`${username}:${password}`);
+  let binary='';
+  for(const byte of bytes)binary+=String.fromCharCode(byte);
+  return `Basic ${btoa(binary)}`;
+}
 const base=(import.meta.env.VITE_API_BASE_URL||'').replace(/\/$/,'');
 export async function request<T>(path:string,init:RequestInit={}):Promise<T>{
   const headers=new Headers(init.headers);
   if(init.body)headers.set('Content-Type','application/json');
   if(accessToken)headers.set('Authorization',`Bearer ${accessToken}`);
+  else if(testUser&&testPassword)headers.set('Authorization',basicAuthorization(testUser,testPassword));
   let response:Response;
   try{response=await fetch(`${base}${path}`,{...init,headers});}
   catch{throw new Error('Falha de conexão com a API. Verifique o backend e o proxy.');}
