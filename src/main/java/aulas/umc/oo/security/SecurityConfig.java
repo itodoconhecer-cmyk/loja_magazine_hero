@@ -30,11 +30,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .requestCache(cache -> cache.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/health")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
-                .httpBasic(basic -> basic.authenticationEntryPoint(authenticationEntryPoint))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(basic -> basic.disable())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
                                 .authenticationEntryPoint(authenticationEntryPoint)
@@ -43,7 +43,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Conta de teste administradora opcional: todas as permissoes de negocio.\n    // Habilitar apenas no laboratorio; desabilitar removendo MAGAZINE_TEST_USERNAME.\n    // Hash BCrypt mantido exclusivamente no Render.
+    // Conta de teste administradora opcional: todas as permissoes de negocio.
+    // Habilitar apenas no laboratorio; desabilitar removendo MAGAZINE_TEST_USERNAME.
+    // Hash BCrypt mantido exclusivamente no Render.
     // Sem estas variaveis, nao existe usuario de teste habilitado.
     @Bean
     @ConditionalOnProperty(name = "MAGAZINE_TEST_USERNAME")
