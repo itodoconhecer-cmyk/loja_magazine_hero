@@ -38,12 +38,12 @@ export function App(){
    <Button color="inherit" size="small" startIcon={<Key/>} onClick={()=>setJwtOpen(true)}>JWT</Button>
  </Toolbar></AppBar>
  <Container maxWidth="xl" sx={{py:3}}><Stack direction="row" flexWrap="wrap" gap={1} sx={{mb:3}}>{links.map(([path,label])=><Button key={path} component={NavLink} to={path} variant="outlined" sx={{'&.active':{bgcolor:'primary.main',color:'#fff'}}}>{label}</Button>)}</Stack>
- {!ready&&<Alert severity="warning" sx={{mb:3}}>Entre com a conta de teste para consultar os dados reais da loja. O acesso de demonstração permite apenas leitura.</Alert>}
+ {!ready&&<Alert severity="warning" sx={{mb:3}}>Entre com a conta de teste para consultar e administrar os dados da loja. Operações de escrita podem modificar o banco de dados.</Alert>}
  <Routes><Route path="/" element={<Catalog/>}/><Route path="/dashboard" element={<Dashboard/>}/>{links.slice(2).map(([path])=><Route key={path} path={path} element={<Management section={path.slice(1)}/>}/>)}<Route path="*" element={<Navigate to="/" replace/>}/></Routes></Container>
  <Dialog open={open} onClose={()=>{if(!pending)setOpen(false)}} fullWidth maxWidth="xs">
    <DialogTitle>Entrar na Loja Magazine Hero</DialogTitle>
    <DialogContent><Stack spacing={2} sx={{pt:1}}>
-     <Typography color="text.secondary" variant="body2">Conta de demonstração: acesso de leitura. As credenciais permanecem somente na memória desta aba e são enviadas por HTTPS ao backend.</Typography>
+     <Typography color="text.secondary" variant="body2">Conta administrativa de laboratório: permissões completas para testar os fluxos. Use apenas com dados de teste. As credenciais permanecem na memória da aba e são enviadas por HTTPS.</Typography>
      {loginError&&<Alert severity="error">{loginError}</Alert>}
      <TextField fullWidth label="Usuário" autoComplete="username" value={username} onChange={e=>setUsername(e.target.value)} />
      <TextField fullWidth label="Senha" type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!pending&&username&&password)void login();}}/>
