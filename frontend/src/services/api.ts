@@ -42,6 +42,7 @@ const post=<T>(url:string,data:object)=>request<T>(url,{method:'POST',body:JSON.
 const action=(url:string)=>request<unknown>(url,{method:'POST'});
 const id=(value:string)=>encodeURIComponent(value);
 export const api={
+  catalogo:()=>request<Produto[]>('/api/catalogo/produtos'),
   produtos:()=>request<Produto[]>('/api/produtos'),criarProduto:(nome:string,preco:number)=>post<Produto>('/api/produtos',{nome,preco}),
   clientes:()=>request<Cliente[]>('/api/clientes'),criarCliente:(nome:string,email:string)=>post<Cliente>('/api/clientes',{nome,email}),
   carrinhos:()=>request<Carrinho[]>('/api/carrinhos'),criarCarrinho:(clienteId:string)=>post<Carrinho>('/api/carrinhos',{clienteId}),
