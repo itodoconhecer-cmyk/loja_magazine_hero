@@ -1,18 +1,18 @@
 package aulas.umc.oo.security;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -30,10 +30,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .requestCache(cache -> cache.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/logout").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .httpBasic(basic -> basic.disable())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
@@ -58,17 +60,26 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(User.withUsername(username)
                 .password("{bcrypt}" + passwordHash)
                 .authorities(
-                        Permission.CLIENTE_LER, Permission.CLIENTE_ESCREVER,
-                        Permission.PRODUTO_LER, Permission.PRODUTO_ESCREVER,
-                        Permission.CARRINHO_LER, Permission.CARRINHO_ESCREVER,
+                        Permission.CLIENTE_LER,
+                        Permission.CLIENTE_ESCREVER,
+                        Permission.PRODUTO_LER,
+                        Permission.PRODUTO_ESCREVER,
+                        Permission.CARRINHO_LER,
+                        Permission.CARRINHO_ESCREVER,
                         Permission.CARRINHO_PROCESSAR,
-                        Permission.PEDIDO_LER, Permission.PEDIDO_ESCREVER,
-                        Permission.PEDIDO_CALCULAR_FRETE, Permission.PEDIDO_APROVAR,
-                        Permission.PEDIDO_CANCELAR, Permission.PEDIDO_EXCLUIR,
+                        Permission.PEDIDO_LER,
+                        Permission.PEDIDO_ESCREVER,
+                        Permission.PEDIDO_CALCULAR_FRETE,
+                        Permission.PEDIDO_APROVAR,
+                        Permission.PEDIDO_CANCELAR,
+                        Permission.PEDIDO_EXCLUIR,
                         Permission.PEDIDO_EDITAR,
-                        Permission.PAGAMENTO_LER, Permission.PAGAMENTO_ESCREVER,
-                        Permission.PAGAMENTO_APROVAR, Permission.PAGAMENTO_ESTORNAR,
-                        Permission.ESTOQUE_LER, Permission.ESTOQUE_MOVIMENTAR)
+                        Permission.PAGAMENTO_LER,
+                        Permission.PAGAMENTO_ESCREVER,
+                        Permission.PAGAMENTO_APROVAR,
+                        Permission.PAGAMENTO_ESTORNAR,
+                        Permission.ESTOQUE_LER,
+                        Permission.ESTOQUE_MOVIMENTAR)
                 .build());
     }
 
