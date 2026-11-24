@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Catalogo publico, separado das operacoes administrativas de produtos.
- * O carrinho do visitante e mantido no navegador e nao cria registros no banco.
+ * Catalogo publico, separado das operacoes administrativas de produtos. O carrinho do visitante e mantido no navegador
+ * e nao cria registros no banco.
  */
 @RestController
 @RequestMapping("/api/catalogo")
