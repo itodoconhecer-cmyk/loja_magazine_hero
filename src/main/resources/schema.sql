@@ -16,6 +16,14 @@ create table if not exists produto(
 -- Produto nao deve armazenar saldo de estoque.
 alter table produto drop column if exists estoque;
 
+-- Novas colunas para classificacao e verificacao de integridade de midias.
+-- Evitar alterar/corrigir automaticamente o hash esperado durante a leitura.
+alter table produto add column if not exists departamento varchar(80) not null default 'Tecnologia';
+alter table produto add column if not exists imagem_storage_path varchar(255);
+alter table produto add column if not exists imagem_sha256 varchar(64);
+create index if not exists idx_produto_departamento_ativo on produto(departamento, ativo);
+
+
 create table if not exists carrinho(
     id uuid primary key,
     cliente_id uuid not null references cliente(id),
