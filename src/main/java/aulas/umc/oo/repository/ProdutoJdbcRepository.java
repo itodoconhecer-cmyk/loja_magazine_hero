@@ -29,29 +29,25 @@ public class ProdutoJdbcRepository implements ProdutoRepository {
         return produto;
     }
 
+    private static final String PRODUCT_FIELDS =
+            "id, nome, preco, ativo, departamento, imagem_storage_path, imagem_sha256";
+
     @Override
     public List<Produto> findAll() {
-        return jdbc.query(
-                "select id, nome, preco, ativo, departamento, imagem_storage_path, imagem_sha256 from produto where ativo = true order by nome", (rs, rowNum) -> map(rs));
+        String sql = "select " + PRODUCT_FIELDS + " from produto where ativo = true order by nome";
+        return jdbc.query(sql, (rs, rowNum) -> map(rs));
     }
 
     @Override
     public Optional<Produto> findById(UUID id) {
-        return jdbc
-                .query(
-                        "select id, nome, preco, ativo, departamento, imagem_storage_path, imagem_sha256 from produto where id = ? and ativo = true",
-                        (rs, rowNum) -> map(rs),
-                        id)
-                .stream()
-                .findFirst();
+        String sql = "select " + PRODUCT_FIELDS + " from produto where id = ? and ativo = true";
+        return jdbc.query(sql, (rs, rowNum) -> map(rs), id).stream().findFirst();
     }
 
     @Override
     public Optional<Produto> findByIdIncludingInactive(UUID id) {
-        return jdbc
-                .query("select id, nome, preco, ativo, departamento, imagem_storage_path, imagem_sha256 from produto where id = ?", (rs, rowNum) -> map(rs), id)
-                .stream()
-                .findFirst();
+        String sql = "select " + PRODUCT_FIELDS + " from produto where id = ?";
+        return jdbc.query(sql, (rs, rowNum) -> map(rs), id).stream().findFirst();
     }
 
     @Override
