@@ -30,7 +30,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .requestCache(cache -> cache.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos")
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos", "/api/catalogo/produtos/*/imagem")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
                         .permitAll()
