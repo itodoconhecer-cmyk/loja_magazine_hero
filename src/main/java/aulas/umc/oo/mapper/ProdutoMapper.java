@@ -13,6 +13,9 @@ public class ProdutoMapper {
     }
 
     public ProdutoResponse toResponse(Produto produto) {
-        return new ProdutoResponse(produto.id, produto.nome, produto.preco, produto.ativo);
+        String image = produto.imagemStoragePath != null && produto.imagemSha256 != null
+                ? "/api/catalogo/produtos/" + produto.id + "/imagem"
+                : null;
+        return new ProdutoResponse(produto.id, produto.nome, produto.preco, produto.ativo, produto.departamento, image);
     }
 }
