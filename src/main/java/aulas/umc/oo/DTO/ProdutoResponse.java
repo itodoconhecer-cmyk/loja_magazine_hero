@@ -10,4 +10,6 @@ public record ProdutoResponse(
         @NotNull UUID id,
         @NotBlank String nome,
         @NotNull @PositiveOrZero BigDecimal preco,
-        boolean ativo) {}
+        boolean ativo,
+        String departamento,
+        String imagemUrl) {}
