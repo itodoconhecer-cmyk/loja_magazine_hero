@@ -13,6 +13,9 @@ public class Produto extends Domain {
     public String nome;
     public BigDecimal preco;
     public boolean ativo = true;
+    public String departamento = "Tecnologia";
+    public String imagemStoragePath;
+    public String imagemSha256;
 
     public Produto() {
         this.id = UUID.randomUUID();
