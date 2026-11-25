@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,8 +62,8 @@ public class ImagemCatalogoController {
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType("image/svg+xml"))
                     .cacheControl(CacheControl.noStore())
-                    .header(HttpHeaders.X_CONTENT_TYPE_OPTIONS, "nosniff")
-                    .header(HttpHeaders.CONTENT_SECURITY_POLICY, "sandbox; default-src 'none'")
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header("Content-Security-Policy", "sandbox; default-src 'none'")
                     .body(file);
         } catch (IOException ex) {
             log.error("MEDIA_INTEGRITY_VIOLATION productId={} reason=storage_unavailable", id, ex);
