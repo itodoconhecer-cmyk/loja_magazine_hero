@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Serves only verified bytes. Storage path is an allowlisted classpath resource;
- * untrusted or modified bytes are never returned to the browser.
+ * Serves only verified bytes. Storage path is an allowlisted classpath resource; untrusted or modified bytes are never
+ * returned to the browser.
  */
 @RestController
 @RequestMapping("/api/catalogo")
