@@ -5,8 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 /**
- * Integrity check of the original file bytes against the trusted hash stored in PostgreSQL.
- * The expected hash is never rewritten when validation fails.
+ * Integrity check of the original file bytes against the trusted hash stored in PostgreSQL. The expected hash is never
+ * rewritten when validation fails.
  */
 public final class MediaSha256Verifier {
     private MediaSha256Verifier() {}
@@ -24,11 +24,4 @@ public final class MediaSha256Verifier {
         }
     }
 
-    public static String hash(byte[] bytes) {
-        try {
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("SHA-256 unavailable", ex);
-        }
-    }
 }
