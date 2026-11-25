@@ -23,5 +23,4 @@ public final class MediaSha256Verifier {
             throw new IllegalStateException("SHA-256 unavailable", ex);
         }
     }
-
 }
