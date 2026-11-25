@@ -5,19 +5,11 @@ import {Alert,Badge,Box,Button,Chip,CircularProgress,Divider,Drawer,IconButton,I
 import {Link as RouterLink} from 'react-router-dom';
 import {api,moeda,type Produto} from '../services/api';
 import {ProductGrid} from '../components/organisms/ProductGrid';
+import {FeaturedCarousel} from '../components/organisms/FeaturedCarousel';
 import {StatusMessage} from '../components/molecules/StatusMessage';
 import {addToCart,cartTotal,changeQuantity,readCart,saveCart,type CartEntry} from '../services/guestCart';
 
 type Sort='featured'|'price-low'|'price-high'|'name';
-function categoryOf(s:string){
- const v=s.toLowerCase();
- if(/fone|head|som|caixa de som|bluetooth/.test(v))return 'Áudio';
- if(/sofá|sofa|cadeira|mesa|decor|cozinha|cafeteira|geladeira/.test(v))return 'Casa';
- if(/game|console|controle|playstation|xbox/.test(v))return 'Games';
- if(/roupa|tenis|tênis|camisa|bolsa|mochila|vestido/.test(v))return 'Estilo';
- return 'Tecnologia';
-}
-
 export function Catalog(){
  const [search,setSearch]=useState('');
  const [category,setCategory]=useState('Todos');
@@ -28,10 +20,10 @@ export function Catalog(){
  const products=useQuery({queryKey:['public-catalog'],queryFn:api.catalogo,staleTime:60000});
  const all=products.data||[];
  useEffect(()=>saveCart(cart),[cart]);
- const categories=useMemo(()=>['Todos',...new Set(all.map(p=>categoryOf(p.nome)))], [all]);
+ const categories=useMemo(()=>['Todos',...new Set(all.map(p=>p.departamento||'Tecnologia'))], [all]);
  const filtered=useMemo(()=>{
   const q=search.trim().toLocaleLowerCase('pt-BR');
-  const list=all.filter(p=>(category==='Todos'||categoryOf(p.nome)===category)&&p.nome.toLocaleLowerCase('pt-BR').includes(q));
+  const list=all.filter(p=>(category==='Todos'||(p.departamento||'Tecnologia')===category)&&p.nome.toLocaleLowerCase('pt-BR').includes(q));
   if(sort==='price-low')return [...list].sort((a,b)=>Number(a.preco)-Number(b.preco));
   if(sort==='price-high')return [...list].sort((a,b)=>Number(b.preco)-Number(a.preco));
   if(sort==='name')return [...list].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
@@ -61,6 +53,7 @@ export function Catalog(){
      <Box><Typography fontWeight={850} fontSize={14}>{title}</Typography><Typography color="text.secondary" variant="body2">{subtitle}</Typography></Box>
     </Stack>)}
   </Stack>
+  <FeaturedCarousel products={all} onAdd={addProduct}/>
   <Box id="produtos-da-loja" sx={{scrollMarginTop:100}}>
    <Stack direction={{xs:'column',md:'row'}} alignItems={{md:'flex-end'}} justifyContent="space-between" gap={2} sx={{mb:3}}>
     <Box><Typography color="secondary" variant="overline" fontWeight={900} letterSpacing={2}>CATÁLOGO MAGAZINE HERO</Typography><Typography variant="h4" fontWeight={950} sx={{letterSpacing:'-.04em'}}>Escolhas que fazem a diferença.</Typography><Typography color="text.secondary">Encontre o que combina com você — sem criar conta.</Typography></Box>
