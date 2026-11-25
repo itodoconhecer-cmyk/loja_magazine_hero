@@ -1,4 +1,4 @@
-export type Produto={id:string;nome:string;preco:number;ativo:boolean};
+export type Produto={id:string;nome:string;preco:number;ativo:boolean;departamento?:string;imagemUrl?:string|null};
 export type Cliente={id:string;nome:string;email:string};
 export type ItemCarrinho={id:string;produtoId:string;quantidade:number};
 export type Carrinho={id:string;clienteId:string;ativo:boolean;itens:ItemCarrinho[]};
