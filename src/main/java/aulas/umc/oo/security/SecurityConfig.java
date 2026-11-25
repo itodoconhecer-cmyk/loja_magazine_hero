@@ -18,6 +18,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+    private static final String[] PUBLIC_GET_ROUTES = {
+        "/health", "/api/catalogo/produtos", "/api/catalogo/produtos/*/imagem"
+    };
 
     @Bean
     SecurityFilterChain securityFilterChain(
@@ -30,7 +33,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .requestCache(cache -> cache.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/health", "/api/catalogo/produtos", "/api/catalogo/produtos/*/imagem")
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, PUBLIC_GET_ROUTES)
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh", "/api/auth/logout")
                         .permitAll()
